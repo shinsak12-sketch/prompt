@@ -1,0 +1,503 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>기념식 프롬프터 재설계</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;900&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#E9ECF0; --panel:#F4F6F9; --panel-2:#DFE3E9; --ink:#151A22; --ink-2:#3C4552; --muted:#6B7482;
+  --line:#CBD1D9; --accent:#D97A21; --accent-ink:#8A4A0C; --accent-soft:#F6E3CF;
+  --mcA:#2F6FE4; --mcB:#D3467C; --gold:#B8860B; --ok:#2E8B57;
+  --hi:rgba(255,255,255,.85); --lo:rgba(20,26,34,.16); --lo2:rgba(20,26,34,.08);
+  --tv-bg:#050608; --tv-fg:#F4F6F8; --tv-dim:rgba(244,246,248,.36); --tv-cue:#F0B252; --tv-A:#8BD1FF; --tv-B:#FFAFD3;
+  --r:14px; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --disp:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1116; --panel:#151A21; --panel-2:#1C222B; --ink:#E7EBF1; --ink-2:#C2C9D3; --muted:#8B94A3;
+  --line:#2A313C; --accent:#F0A040; --accent-ink:#F6C98A; --accent-soft:#2B2116;
+  --mcA:#7FB2FF; --mcB:#FF8DBA; --gold:#E2B94B; --ok:#5CC48B;
+  --hi:rgba(255,255,255,.05); --lo:rgba(0,0,0,.55); --lo2:rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#0E1116; --panel:#151A21; --panel-2:#1C222B; --ink:#E7EBF1; --ink-2:#C2C9D3; --muted:#8B94A3;
+  --line:#2A313C; --accent:#F0A040; --accent-ink:#F6C98A; --accent-soft:#2B2116;
+  --mcA:#7FB2FF; --mcB:#FF8DBA; --gold:#E2B94B; --ok:#5CC48B;
+  --hi:rgba(255,255,255,.05); --lo:rgba(0,0,0,.55); --lo2:rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding-inline:clamp(16px,4vw,40px);padding-block:32px 96px}
+h1,h2,h3{font-family:var(--disp);letter-spacing:-.02em;text-wrap:balance;word-break:keep-all;margin:0}
+h1{font-size:clamp(30px,5vw,46px);font-weight:900;line-height:1.15}
+h2{font-size:clamp(21px,3vw,26px);font-weight:900;line-height:1.25}
+h3{font-size:17px;font-weight:700;color:var(--ink-2);margin-bottom:8px}
+p{margin:0 0 12px}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);font-weight:600}
+.hero{display:grid;gap:18px;margin-bottom:36px}
+.hero .lede{font-size:17px;color:var(--ink-2);max-width:40em}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:12px;padding:5px 10px;border-radius:999px;background:var(--panel);box-shadow:inset 1px 1px 0 var(--hi),0 1px 2px var(--lo2);color:var(--ink-2)}
+.chip b{color:var(--accent);font-weight:600}
+/* 양각 패널 */
+.card{background:var(--panel);border-radius:var(--r);padding:20px 22px;box-shadow:inset 1px 1px 0 var(--hi),0 1px 2px var(--lo2),0 10px 24px -14px var(--lo);transition:transform .25s ease,box-shadow .25s ease}
+.card:hover{transform:translateY(-2px);box-shadow:inset 1px 1px 0 var(--hi),0 2px 4px var(--lo2),0 16px 32px -14px var(--lo)}
+/* 음각 패널 */
+.inset{background:var(--panel-2);border-radius:10px;padding:14px 16px;box-shadow:inset 2px 2px 6px var(--lo2),inset -1px -1px 0 var(--hi)}
+section{margin-top:56px;display:grid;gap:18px}
+section>header{display:grid;gap:6px}
+.num{font-family:var(--mono);color:var(--muted);font-size:12px;letter-spacing:.1em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+ul{margin:0;padding-left:1.15em}li{margin:4px 0}
+li::marker{color:var(--accent)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px}
+.kv dt{color:var(--muted);font-family:var(--mono);font-size:12.5px;padding-top:2px}
+.kv dd{margin:0}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px;background:var(--panel);border-radius:12px;overflow:hidden;box-shadow:inset 1px 1px 0 var(--hi),0 1px 2px var(--lo2)}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td.c{text-align:center;font-family:var(--mono)}
+.tw{overflow-x:auto;border-radius:12px}
+.tag{display:inline-block;font-family:var(--mono);font-size:11.5px;padding:2px 8px;border-radius:6px;font-weight:600;line-height:1.5}
+.t-bad{background:#F8D7D5;color:#8B1E1A}.t-warn{background:var(--accent-soft);color:var(--accent-ink)}.t-ok{background:#D6F0E0;color:#1E6B3E}.t-keep{background:#DDE7FA;color:#22499A}
+:root[data-theme="dark"] .t-bad,:root:not([data-theme="light"]) .t-bad{background:#3A1D1C;color:#F3A9A4}
+:root[data-theme="dark"] .t-ok,:root:not([data-theme="light"]) .t-ok{background:#173226;color:#8AD9A9}
+:root[data-theme="dark"] .t-keep,:root:not([data-theme="light"]) .t-keep{background:#1A2841;color:#9FBEF7}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .t-bad{background:#F8D7D5;color:#8B1E1A}:root:not([data-theme="dark"]) .t-ok{background:#D6F0E0;color:#1E6B3E}:root:not([data-theme="dark"]) .t-keep{background:#DDE7FA;color:#22499A}}
+code,kbd{font-family:var(--mono);font-size:.9em}
+kbd{display:inline-block;min-width:1.6em;text-align:center;padding:1px 7px;border-radius:6px;background:var(--panel);color:var(--ink);box-shadow:inset 0 -2px 0 var(--lo2),inset 1px 1px 0 var(--hi),0 1px 1px var(--lo2);border:1px solid var(--line);font-size:12.5px;line-height:1.6}
+.callout{border-left:4px solid var(--accent);padding:12px 16px;background:var(--accent-soft);border-radius:0 10px 10px 0;color:var(--ink)}
+.callout b{color:var(--accent-ink)}
+.mcA{color:var(--mcA);font-weight:600}.mcB{color:var(--mcB);font-weight:600}
+/* ---------- TV 목업 ---------- */
+.tv{position:relative;background:var(--tv-bg);border-radius:14px;aspect-ratio:16/9;max-width:100%;overflow:hidden;box-shadow:0 0 0 6px #1a1e25,0 0 0 8px #2b3038,0 30px 50px -20px rgba(0,0,0,.7);color:var(--tv-fg);font-family:var(--disp)}
+.tv .stage{position:absolute;inset:0;overflow:hidden}
+.tv .guide{position:absolute;left:0;right:0;top:33%;height:0;border-top:1.5px solid rgba(240,178,82,.55);pointer-events:none;z-index:3}
+.tv .guide::before{content:"";position:absolute;left:0;top:-7px;border:7px solid transparent;border-left:12px solid var(--tv-cue)}
+.tv .guide::after{content:"";position:absolute;right:0;top:-7px;border:7px solid transparent;border-right:12px solid var(--tv-cue)}
+.tv .fade-top{position:absolute;left:0;right:0;top:0;height:22%;background:linear-gradient(var(--tv-bg),transparent);z-index:2;pointer-events:none}
+.tv .fade-bot{position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(transparent,var(--tv-bg));z-index:2;pointer-events:none}
+.tv .roll{position:absolute;left:7%;right:7%;top:0;will-change:transform;animation:roll 34s linear infinite;padding-top:33%}
+@media (prefers-reduced-motion: reduce){.tv .roll{animation:none;transform:translateY(-14%)}}
+@keyframes roll{from{transform:translateY(0)}to{transform:translateY(-62%)}}
+.tv .line{display:grid;grid-template-columns:5px 1fr;gap:0 clamp(8px,1.6vw,16px);margin-bottom:clamp(10px,2.4vw,24px)}
+.tv .bar{border-radius:3px;background:var(--tv-A);opacity:.9}
+.tv .line.b .bar{background:var(--tv-B)}
+.tv .who{font-size:clamp(7px,1.15vw,12px);font-weight:700;letter-spacing:.02em;color:var(--tv-A);margin-bottom:.2em}
+.tv .line.b .who{color:var(--tv-B)}
+.tv .txt{font-size:clamp(11px,2.35vw,25px);font-weight:700;line-height:1.42;letter-spacing:-.01em;word-break:keep-all}
+.tv .cue{grid-column:1/-1;font-size:clamp(7px,1.15vw,12px);color:var(--tv-cue);background:rgba(240,178,82,.08);border:1px solid rgba(240,178,82,.25);border-radius:6px;padding:.35em .7em;display:flex;gap:.7em;align-items:center;font-family:var(--body)}
+.tv .cue .hold{font-family:var(--mono);font-size:.85em;background:var(--tv-cue);color:#1a1200;border-radius:4px;padding:0 .45em;font-weight:700}
+.tv .sec{grid-column:1/-1;font-size:clamp(7px,1.05vw,11px);color:rgba(244,246,248,.5);letter-spacing:.12em;font-family:var(--mono);border-bottom:1px solid rgba(244,246,248,.12);padding-bottom:.4em}
+.tv .hud{position:absolute;right:2%;top:2.5%;z-index:4;display:flex;gap:6px;font-family:var(--mono);font-size:clamp(6px,1vw,11px);opacity:.75}
+.tv .hud span{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:.15em .6em}
+.tv .hud .run{color:#7CE39C}
+.tv .bottom{position:absolute;left:0;right:0;bottom:0;z-index:4;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:clamp(8px,2vw,18px) 3% 2.5%;display:grid;gap:6px;font-family:var(--mono);font-size:clamp(6px,1vw,11px)}
+.tv .prog{height:4px;border-radius:2px;background:rgba(255,255,255,.12);position:relative}
+.tv .prog i{position:absolute;left:0;top:0;bottom:0;width:31%;background:var(--tv-cue);border-radius:2px}
+.tv .prog b{position:absolute;top:-2px;width:2px;height:8px;background:rgba(255,255,255,.55)}
+.tv .ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;opacity:.9}
+.tv .ctl span{border:1px solid rgba(255,255,255,.22);border-radius:6px;padding:.25em .7em;background:rgba(255,255,255,.06)}
+.tv .ctl .pri{background:rgba(240,178,82,.9);color:#1a1200;border-color:transparent;font-weight:700}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px;font-size:13.5px;margin-top:12px}
+.legend>div{display:flex;gap:10px;align-items:flex-start}.legend>div>div{display:block}.legend i{flex:none;width:22px;height:22px;border-radius:6px;font-family:var(--mono);font-size:11px;display:grid;place-items:center;background:var(--accent);color:#fff;font-style:normal;font-weight:700;margin-top:2px}
+/* 속도 도표 */
+.speedbar{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;align-items:end;height:90px;margin:8px 0 6px}
+.speedbar div{background:linear-gradient(180deg,var(--accent),var(--accent-ink));border-radius:4px 4px 2px 2px;position:relative;box-shadow:inset 1px 1px 0 rgba(255,255,255,.25)}
+.speedbar div span{position:absolute;top:-20px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.speedbar div.def{outline:2px solid var(--ink);outline-offset:2px}
+.axis{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center}
+/* 키맵 */
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.key{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start;padding:10px 12px;border-radius:10px;background:var(--panel);box-shadow:inset 1px 1px 0 var(--hi),0 1px 2px var(--lo2)}
+.key .ks{display:flex;flex-wrap:wrap;gap:4px}
+.key .d{font-size:14px}.key .d small{display:block;color:var(--muted);font-size:12.5px}
+/* 결정 */
+.decide{display:grid;gap:12px}
+.opt{display:grid;grid-template-columns:36px 1fr;gap:12px;padding:12px 14px;border-radius:10px;background:var(--panel);box-shadow:inset 1px 1px 0 var(--hi),0 1px 2px var(--lo2)}
+.opt .l{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--accent-ink);background:var(--accent-soft);border-radius:8px;height:30px;display:grid;place-items:center}
+.opt .rec{font-size:11.5px;color:var(--ok);font-family:var(--mono);margin-left:6px}
+.steps{display:grid;gap:10px;counter-reset:s}
+.step{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+.step::before{counter-increment:s;content:counter(s);font-family:var(--mono);font-weight:600;color:var(--accent);background:var(--panel);border-radius:10px;height:44px;display:grid;place-items:center;box-shadow:inset 1px 1px 0 var(--hi),0 2px 4px var(--lo2)}
+.step b{display:block;font-family:var(--disp);font-weight:700}
+.step small{color:var(--muted)}
+footer{margin-top:64px;color:var(--muted);font-size:13px;font-family:var(--mono)}
+@media (max-width:560px){.key{grid-template-columns:1fr}.kv{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <div class="eyebrow">Design Spec · 창립 42주년 기념식 사회자 프롬프터</div>
+  <h1>페이지 넘김이 아닌, 흐르는 프롬프터로 재설계</h1>
+  <p class="lede">후배 버전(v1)을 분석하고 외부 프롬프터 앱·방송용 프롬프터 소프트웨어 기능을 벤치마킹한 뒤, 대사 표시와 연속 스크롤에 집중한 v2 설계안을 정리함. 구현은 아직 안 함. 마지막 장의 결정 사항만 정해주면 바로 제작 들어감.</p>
+  <div class="meta-row">
+    <span class="chip">대사 <b>79</b>개</span><span class="chip">본문 <b>4,246</b>자</span><span class="chip">식순 <b>8</b>개</span><span class="chip">영상 큐 <b>14</b>개</span><span class="chip">순발화 약 <b>13</b>분</span><span class="chip">출연 <b>MC 2</b>명 + 상장 낭독</span>
+  </div>
+</header>
+
+<!-- 0 -->
+<section>
+  <header><div class="num">00 · 결론 먼저</div><h2>한 줄 진단과 방향</h2></header>
+  <div class="callout">
+    <p><b>진단.</b> v1은 「대사 편집기 + 한 장씩 넘기는 뷰어」에 가까움. 시선 표기·편집·되돌리기·수정본 저장 같은 부가 기능이 촬영 화면에 상주하고, 정작 프롬프터의 본질인 <b>일정 속도로 부드럽게 흐르는 대사</b>와 <b>운영자의 즉각적 속도·정지 제어</b>가 없음.</p>
+    <p style="margin:0"><b>방향.</b> ① 촬영 모드와 편집 모드를 분리 ② 픽셀 단위 연속 스크롤 엔진(rAF) 도입 ③ 시선 필드 제거 ④ 영상 송출 큐 지점에서 자동 정지(Hold) ⑤ 운영자 UI는 TV 화면에서 자동으로 사라짐. 기존 대본 JSON 구조와 화자 색상은 그대로 계승.</p>
+  </div>
+</section>
+
+<!-- 1 -->
+<section>
+  <header><div class="num">01 · 사용 환경</div><h2>이 프롬프터가 놓이는 자리</h2></header>
+  <div class="grid2">
+    <div class="card"><h3>출력·시청</h3>
+      <dl class="kv">
+        <dt>표시 장치</dt><dd>카메라 옆 TV (1080p 또는 4K, 브라우저 전체화면)</dd>
+        <dt>시청자</dt><dd>MC 2명 (<span class="mcA">김우중</span> / <span class="mcB">최윤정</span>), 시거리 약 3~4m 추정</dd>
+        <dt>읽는 방식</dt><dd>두 사람이 번갈아 읽음. 대화체 짧은 대사가 대부분(평균 53자, 최대 118자)</dd>
+        <dt>특수 항목</dt><dd>상장 낭독 3건(줄바꿈 유지 필요), 퀴즈 진행 구간</dd>
+      </dl>
+    </div>
+    <div class="card"><h3>운영</h3>
+      <dl class="kv">
+        <dt>운영자</dt><dd>스태프 1명, 노트북 키보드·마우스 또는 프레젠터 클리커</dd>
+        <dt>진행 특성</dt><dd>영상(VTR)·CG 송출 대기가 14곳 → 프롬프터가 <b>멈춰서 기다리는 구간</b>이 잦음</dd>
+        <dt>행사 길이</dt><dd>본행사 약 50분, 순수 발화 약 13분(한국어 약 320자/분 기준)</dd>
+        <dt>배포</dt><dd>단일 HTML 파일, 오프라인 동작, 설치 없음</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section>
+  <header><div class="num">02 · 현재 버전(v1) 진단</div><h2>후배 버전에서 확인한 것</h2>
+  <p style="color:var(--muted);margin:0">파일을 1920×1080으로 실제 렌더링하고 코드를 읽어서 확인한 내용임. 추측이 아닌 재현된 사실만 기재.</p></header>
+  <div class="tw"><table>
+    <thead><tr><th style="width:26%">항목</th><th>확인 내용</th><th style="width:90px">판정</th></tr></thead>
+    <tbody>
+      <tr><td>스크롤 모델</td><td>「다음」을 누르면 <code>scrollTo(instant)</code>로 즉시 점프. 한 번에 약 240px씩 튐. 연속 스크롤·속도 개념 자체가 없음. 사실상 한 장씩 넘기는 슬라이드.</td><td><span class="tag t-bad">교체</span></td></tr>
+      <tr><td>시선(gaze) 표기</td><td>화자 이름 옆에 43px 크기로 「시선 ▶ 최윤정 → 카메라」 상시 표시. 대사보다 눈에 먼저 들어옴. 요구사항상 불필요.</td><td><span class="tag t-bad">제거</span></td></tr>
+      <tr><td>촬영 화면 내 편집</td><td>모든 대사가 <code>contentEditable</code>. 촬영 중 화면을 클릭하면 편집 모드로 들어가고, 그 순간 방향키·Enter·Space가 진행 키가 아니라 글 편집 키로 바뀜. 진행 사고 위험.</td><td><span class="tag t-bad">분리</span></td></tr>
+      <tr><td>정보 밀도</td><td>「방금 읽음 / 이전 N / 다음 N / 현재 60/79 / 식순명 / 큐」 등 메타 텍스트가 대사 사이사이에 삽입. 대사 외 요소가 시야를 잡아먹음.</td><td><span class="tag t-warn">축소</span></td></tr>
+      <tr><td>화자 이름 위치</td><td>현재 대사의 헤더가 절대 배치(<code>bottom: 100% + 22px</code>)라 대사 길이·이전 대사 길이에 따라 이름 위치가 매번 튐. 시선 고정 불가.</td><td><span class="tag t-warn">재배치</span></td></tr>
+      <tr><td>조작 UI 숨기기(H)</td><td>버그. <code>#toolbar{display:flex}</code>(ID 선택자)가 <code>body.controls-hidden .chrome{display:none}</code>보다 우선순위가 높아 실제로는 숨겨지지 않음. 「H · 조작 표시」 버튼만 겹쳐서 나타남. 재현 확인.</td><td><span class="tag t-bad">버그</span></td></tr>
+      <tr><td>툴바·푸터 상시 표시</td><td>위아래 약 110px을 항상 점유. TV에 「A− 76 A+」 같은 운영 UI가 그대로 노출.</td><td><span class="tag t-warn">자동 숨김</span></td></tr>
+      <tr><td>시작 위치</td><td>파일에 내장된 저장 상태가 <code>index: 59</code>라 처음 열면 60/79에서 시작. 「촬영 시작 상태로 초기화」 기능 없음.</td><td><span class="tag t-warn">리셋 추가</span></td></tr>
+      <tr><td>입력 가로채기</td><td>마우스 측면 버튼, 미디어키, 브라우저 뒤로가기 키까지 전부 가로챔. 필요 이상으로 넓고, 예상 밖 동작의 원인이 됨.</td><td><span class="tag t-warn">정리</span></td></tr>
+      <tr><td>글자 크기 기본값</td><td>1080p 기준 76px. 시거리 3m 판독 계산으로는 적정 범위(07장 참고). 단, 해상도가 바뀌면 px 고정이라 4K TV에서는 절반 크기로 보임.</td><td><span class="tag t-warn">vh 단위로</span></td></tr>
+      <tr><td>대본 데이터 구조</td><td>docx → JSON 변환 구조가 좋음. <code>items[] / section / before(cue·heading) / headings / tail</code>. 해시로 원본 추적. 그대로 재사용.</td><td><span class="tag t-keep">계승</span></td></tr>
+      <tr><td>화자 색상·식순 점프·단일 파일</td><td>김우중=블루, 최윤정=핑크, 상장=골드 구분과 식순 드롭다운, 오프라인 단일 HTML은 잘 잡은 방향.</td><td><span class="tag t-keep">계승</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 3 -->
+<section id="bench">
+  <header><div class="num">03 · 벤치마킹</div><h2>외부 프롬프터 앱·소프트웨어 기능 조사</h2></header>
+    <p style="color:var(--muted);margin:0">소비자 모바일 앱, 웹 프롬프터, 방송용 전문 소프트웨어 세 부류를 조사함. 사내 네트워크 정책상 일부 공식 사이트는 직접 접근이 막혀 매뉴얼·스토어 설명·리뷰·오픈소스 코드로 교차 확인했고, 출처가 있는 수치만 적음.</p>
+  <div class="meta-row">
+    <span class="chip">모바일 · <b>PromptSmart Pro</b> BIGVU Elegant Parrot Teleprompter.com</span>
+    <span class="chip">웹 · <b>Speakflow</b> CuePrompter EasyPrompter/ZaCue Imaginary(오픈소스)</span>
+    <span class="chip">방송 · <b>Autocue QMaster</b> WinCue CueScript CueiT Telescript Flip-Q</span>
+    <span class="chip">데스크톱 · Teleprompter Pro+ Power Prompter OBS Prompter Studio</span>
+    <span class="chip">국내 · 크리스탈프롬프터</span>
+  </div>
+
+  <h3>앱별 핵심 관찰</h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:18%">제품</th><th style="width:22%">스크롤 모델</th><th style="width:26%">속도·조작</th><th>이 프로젝트에 참고할 점</th></tr></thead>
+    <tbody>
+      <tr><td><b>Autocue QMaster / WinCue / CueiT</b><br><span class="tag t-keep">방송 표준</span></td><td>운영자가 조그·셔틀 휠로 직접 운전. 출연자는 읽기만. 셔틀 링을 반대로 돌리면 역방향 스크롤.</td><td>핸드·풋 컨트롤러 버튼: 다음/이전 스토리, 다음/이전 마커, 블랭크, 정지. 마우스 휠 게인 1.0~5.0, 데드밴드 설정.</td><td>큐 마커는 <b>화면 상단 1/4 지점</b>에 작은 화살표. 「상단에서 읽지 말고 마커를 따라 읽고 1~2줄 앞을 훑어라」가 교육 원칙. 런오더·마커 점프·블랭크 스크린은 방송 필수.</td></tr>
+      <tr><td><b>Flip-Q / Telescript</b></td><td>듀얼 스크린 엔진. 운영자 화면은 정방향, 출력 창만 반전.</td><td>커서 위치부터 실행, 북마크, 스크린 블랭커, 출력 색 반전.</td><td>운영자 뷰와 출연자 뷰 분리가 전문 소프트웨어의 기본형. 축소 미리보기 + 현재 위치·속도·시간 표시.</td></tr>
+      <tr><td><b>Teleprompter Pro+</b> (Mac/iOS)</td><td>연속 스크롤, 속도 <b>10~150 px/s</b> 정밀 조절.</td><td>키보드·핸드 리모컨·게임패드. 1:1 복제 창을 외부 디스플레이로 드래그, 복제 창만 미러.</td><td>읽기 가이드의 모양·색·위치·<b>불투명도</b> 커스텀. 프롬프팅 중 실시간 원고 수정(Live Updates).</td></tr>
+      <tr><td><b>Speakflow</b> (웹)</td><td>Flow(음성) / Auto / Manual 3모드.</td><td>Auto 속도는 <b>숫자키 1~9</b>, +/−로 미세조정. 모든 동작에 단축키.</td><td>글자 10~250px 직접 입력, 행간 5단계, 폭 0~90%. <b>Read line</b> 켜고 끄기와 위치 이동. 풀스크린 3-2-1 카운트다운.</td></tr>
+      <tr><td><b>Imaginary Teleprompter</b> (오픈소스)</td><td>연속 스크롤. 속도 1~20(기본 4.0) + <b>가속도 0.5~1.8(기본 1.45)</b>.</td><td>↑↓ 또는 W/S 또는 휠로 속도·글자 크기, Space 정지.</td><td>폭 기본 84%, 글자 120%. 포커스 영역 None / Top / <b>Middle(전문 프롬프터 기본)</b> / Bottom. 플립 No / 좌우 / 상하 / 180°.</td></tr>
+      <tr><td><b>Teleprompter.com</b></td><td>Fixed Speed / Timed(총 시간 지정) / WPM 3모드 + 음성.</td><td>폰·워치 리모컨, 프레젠터 리모컨, 풋페달, MIDI.</td><td>잔여 시간 + 진행 바. 카운트다운 최대 30초. WPM은 120~160 권장.</td></tr>
+      <tr><td><b>BIGVU</b></td><td>연속 스크롤 + 무음 감지 시 정지(drift 방지).</td><td>WPM 단위(기본 160), 녹화 중 ± 버튼, 블루투스 리모컨.</td><td>카운트다운 5초. 「읽기 시작 위치 선택」으로 부분 재촬영.</td></tr>
+      <tr><td><b>PromptSmart Pro</b></td><td>VoiceTrack(음성 추적) / 자동 / 수동.</td><td>리모컨 앱, 웹 컨트롤룸.</td><td>한 줄 vs 여러 줄 하이라이트 선택. 리뷰상 소음·불규칙 페이싱에서 음성 추적 신뢰도 하락 → 방송 녹화는 여전히 운영자 수동 제어가 표준.</td></tr>
+      <tr><td><b>EasyPrompter / ZaCue</b> (웹)</td><td>연속 스크롤. ↑ 되감기, ↓ 빨리감기.</td><td>커스텀 키 매핑 → Stream Deck·풋페달·클리커. QR로 폰을 리모컨화.</td><td>단일/듀얼 모니터: 운영자 정방향, 출연자만 반전. 자동 문장 분리.</td></tr>
+      <tr><td><b>CuePrompter</b> (웹)</td><td>붙여넣기 → 속도 → 재생. 전진/정지/후진.</td><td>Space 시작. 단축키 빈약(리뷰).</td><td>「녹화 중 마우스 없이 정지·속도 조절이 안 된다」가 대표 불만. 키보드 완결성이 중요하다는 반증.</td></tr>
+      <tr><td><b>Parrot</b> / <b>Elegant</b></td><td>연속 스크롤.</td><td>전용 리모컨: 상하=글자 크기, 좌우=속도, OK=재생/정지.</td><td>토글식 마커(특정 줄 고정), 진행 바로 위치 확인·이동, 플로팅 윈도우.</td></tr>
+      <tr><td><b>OBS Prompter Studio</b></td><td>연속 스크롤 vs <b>빈 줄 단락 모드</b> 선택.</td><td>13개 핫키, Xbox 컨트롤러.</td><td>송출에 잡히지 않는 운영자 전용 미리보기 dock. 빔스플리터 관행: 후드 방향에 따라 좌우/상하/180° 선택.</td></tr>
+      <tr><td><b>크리스탈프롬프터</b> (국내)</td><td>하드웨어 번들 SW. 연속 스크롤.</td><td>프롬프팅 중 시간·속도·설정시간·제어창 표시 항목 선택.</td><td>국내는 「PC 소프트웨어 + 반전 모니터」 조합이 표준. 순수 소프트웨어 국산 제품은 뚜렷한 것 없음.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>기능 매트릭스</h3>
+  <p style="color:var(--muted);margin:0 0 8px;font-size:14px">● 표준 · ◐ 상위 제품·유료 · ○ 일부만 · — 거의 없음. 마지막 열은 v2 채택 여부.</p>
+  <div class="tw"><table>
+    <thead><tr><th>기능</th><th class="c">모바일</th><th class="c">웹</th><th class="c">방송 전문</th><th style="width:34%">v2</th></tr></thead>
+    <tbody>
+      <tr><td>연속 자동 스크롤 + 속도 조절</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td><span class="tag t-ok">채택</span> 핵심</td></tr>
+      <tr><td>음성 추적 스크롤</td><td class="c">◐</td><td class="c">◐</td><td class="c">—</td><td><span class="tag t-bad">제외</span> 2인 대화·현장 소음에 부적합</td></tr>
+      <tr><td>단락/페이지 단위 넘김</td><td class="c">○</td><td class="c">○</td><td class="c">—</td><td><span class="tag t-bad">제외</span> v1 방식. 이징 「대사 점프」로만 흔적 유지</td></tr>
+      <tr><td>키보드 단축키(Space·화살표)</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td><span class="tag t-ok">채택</span> 모든 동작에 키</td></tr>
+      <tr><td>프레젠터 클리커·게임패드</td><td class="c">◐</td><td class="c">◐</td><td class="c">●</td><td><span class="tag t-ok">채택</span> PageUp/Down 기본 매핑 + 모드 선택</td></tr>
+      <tr><td>조그·셔틀 휠</td><td class="c">—</td><td class="c">○</td><td class="c">●</td><td><span class="tag t-warn">대체</span> 마우스 휠 넛지 + 게인 설정</td></tr>
+      <tr><td>역방향·되감기</td><td class="c">◐</td><td class="c">●</td><td class="c">●</td><td><span class="tag t-ok">채택</span> 1줄 넛지 + 마지막 재생 시작점 복귀</td></tr>
+      <tr><td>읽기 가이드(마커·라인)</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td><span class="tag t-ok">채택</span> 상단 1/3, 위치·투명도 조절</td></tr>
+      <tr><td>비포커스 줄 디밍</td><td class="c">○</td><td class="c">○</td><td class="c">○</td><td><span class="tag t-warn">부분</span> 지나간 줄만 페이드, 다음 줄은 밝게(미리 읽기 보장)</td></tr>
+      <tr><td>글자 크기·행간·폭·정렬</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td><span class="tag t-ok">채택</span> vh 단위</td></tr>
+      <tr><td>화자별 색상</td><td class="c">○</td><td class="c">○</td><td class="c">◐</td><td><span class="tag t-ok">채택</span> 컬러 바 + 이름표</td></tr>
+      <tr><td>비판독 지시문 스타일링·숨김</td><td class="c">○</td><td class="c">○</td><td class="c">◐</td><td><span class="tag t-ok">채택</span> 앰버 큐 박스 + HOLD</td></tr>
+      <tr><td>좌우 미러 / 상하·180°</td><td class="c">◐ / ○</td><td class="c">● / ◐</td><td class="c">● / ●</td><td><span class="tag t-warn">옵션</span> TV 직시라 기본 끔, M키로 좌우만</td></tr>
+      <tr><td>운영자 정방향 + 출력만 반전(듀얼 스크린)</td><td class="c">○</td><td class="c">◐</td><td class="c">●</td><td><span class="tag t-warn">결정 A</span> 선택 사양</td></tr>
+      <tr><td>카운트다운</td><td class="c">●</td><td class="c">●</td><td class="c">—</td><td><span class="tag t-warn">옵션</span> 3초, 기본 끔(FD 큐가 있음)</td></tr>
+      <tr><td>마커·섹션 점프 / 임의 줄부터 시작</td><td class="c">○</td><td class="c">○</td><td class="c">●</td><td><span class="tag t-ok">채택</span> 식순 점프 + 클릭한 대사부터</td></tr>
+      <tr><td>경과·잔여 시간, 진행률</td><td class="c">●</td><td class="c">○</td><td class="c">●</td><td><span class="tag t-ok">채택</span> HUD·진행 바</td></tr>
+      <tr><td>블랭크 스크린</td><td class="c">—</td><td class="c">—</td><td class="c">●</td><td><span class="tag t-ok">채택</span> B키</td></tr>
+      <tr><td>런오더(다중 대본)</td><td class="c">—</td><td class="c">—</td><td class="c">●</td><td><span class="tag t-bad">제외</span> 대본 1개</td></tr>
+      <tr><td>프롬프팅 중 실시간 편집</td><td class="c">○</td><td class="c">○</td><td class="c">●</td><td><span class="tag t-bad">제외</span> 편집 모드로 분리. 운영자 1명 체제에서 오조작 위험이 더 큼</td></tr>
+      <tr><td>폰을 리모컨으로</td><td class="c">◐</td><td class="c">◐</td><td class="c">○</td><td><span class="tag t-bad">제외</span> 이번 범위 밖</td></tr>
+      <tr><td>Wake Lock·오프라인·커서 숨김</td><td class="c">●</td><td class="c">○</td><td class="c">●</td><td><span class="tag t-ok">채택</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid2">
+    <div class="card"><h3>관측된 기본값</h3>
+      <dl class="kv">
+        <dt>속도 범위</dt><dd>Teleprompter Pro+ 10~150 px/s · Imaginary 1~20(기본 4) · Speakflow 1~9 · BIGVU 160 WPM · 녹화 영상 권장 120~140 WPM</dd>
+        <dt>글자 크기</dt><dd>Speakflow 0.9m 모니터 40~60px · 관용 규칙 「시거리 3m당 글자 높이 약 25mm」</dd>
+        <dt>행간</dt><dd>Speakflow 1 / 1.15 / 1.5 / 2 / 2.5 · 방송 관행 1.35~1.5</dd>
+        <dt>폭</dt><dd>Imaginary 84% · Speakflow 0~90%</dd>
+        <dt>가이드 위치</dt><dd>Autocue 상단 25% · 저속 대화형은 30~35% 선호 · Speakflow 중앙 1/3</dd>
+        <dt>화면 줄 수</dt><dd>뉴스 프롬프터 5~8줄</dd>
+        <dt>카운트다운</dt><dd>BIGVU 5초 · Speakflow 3초 · Teleprompter.com 0~30초</dd>
+        <dt>색</dt><dd>검정 배경 + 흰색 또는 노랑(Autocue 전통) 글자가 사실상 표준</dd>
+        <dt>휠 게인</dt><dd>Autocue 1.0~5.0</dd>
+      </dl>
+    </div>
+    <div class="card"><h3>부드러운 스크롤 구현 관행</h3>
+      <ul>
+        <li><code>setTimeout</code> + 1px 스텝 방식은 60/120Hz 화면에서 스터터. 브라우저 타이머 클램프(약 4ms)에도 걸림.</li>
+        <li>권장: <code>requestAnimationFrame</code> + 프레임 간 경과시간(Δt) 기반 px/s 계산 + <b>부동소수 서브픽셀 누산</b>. 내부 위치는 float로 유지해 저속에서 「멈춘 것처럼 보이는」 현상 제거.</li>
+        <li>속도 변경은 즉시 점프가 아닌 가속도 적용(Imaginary acceleration 1.45).</li>
+        <li>WPM은 참고 지표. 실제 제어는 상대 속도 단계라는 견해가 일반적(Power Prompter는 % · words/s · WPM · lines/s 단위를 클릭으로 전환).</li>
+      </ul>
+    </div>
+  </div>
+
+  <details class="inset"><summary style="cursor:pointer;font-family:var(--mono);font-size:13px">주요 출처 펼치기</summary>
+    <ul style="font-size:12.5px;font-family:var(--mono);line-height:1.8;margin-top:8px;word-break:break-all">
+      <li>Autocue Prompting 101 · autocue.com/education/prompting-101 · 컨트롤러 설정 help.autocue.com</li>
+      <li>WinCue Pro News User Guide · manualzz.com/doc/24434513 · QMaster/QBox markertek.com</li>
+      <li>CueScript CueiT · thebroadcastbridge.com/content/entry/21802 · Telescript telescript.com/software · Flip-Q markertek.com</li>
+      <li>Teleprompter Pro+ · teleprompterpro.com/features · guide.teleprompterpro.com</li>
+      <li>Speakflow settings drawer · speakflow.com/blog/posts/speakflow-settings-drawer · shortcuts speakflow.com/docs/teleprompter-shortcuts</li>
+      <li>Imaginary Teleprompter index.html · github.com/ImaginarySense/Imaginary-Teleprompter</li>
+      <li>Teleprompter.com scrolling modes · teleprompter.com/faq/which-scrolling-mode-should-i-use</li>
+      <li>BIGVU FAQ · faq.bigvu.tv · PromptSmart help · promptsmart.com/help.html</li>
+      <li>EasyPrompter · sourceforge.net/software/product/EasyPrompter · ZaCue zacue.com · CuePrompter sourceforge.net/software/product/CuePrompter</li>
+      <li>OBS Prompter Studio · github.com/candelas741/Prompter-Studio · 미러 원리 teleprompter.com/blog/how-a-teleprompter-mirror-works</li>
+      <li>스크롤 기술 · github.com/fferegrino/nprompter/issues/53 · dev.to/begoodtool 저속 float 이슈</li>
+      <li>시거리 규칙 · datavideo.com/global/article/590 · extron.com/article/videowallfontsize</li>
+      <li>크리스탈프롬프터 · crystalprompter.cafe24.com · 국내 대여 e-friends.co.kr</li>
+    </ul>
+  </details>
+
+</section>
+
+<!-- 4 -->
+<section>
+  <header><div class="num">04 · 설계 원칙</div><h2>v2가 지킬 다섯 가지</h2></header>
+  <div class="grid3">
+    <div class="card"><h3>1. 대사가 왕</h3><p style="margin:0">화면 면적의 90% 이상을 대사에 씀. 화자·큐·식순은 대사를 방해하지 않는 크기와 색으로 물러남.</p></div>
+    <div class="card"><h3>2. 흐름 우선</h3><p style="margin:0">픽셀 단위 연속 스크롤. 속도는 키 한 번에 즉시 바뀌고, 정지·재개도 한 키. 어떤 이동도 덜컥이지 않음.</p></div>
+    <div class="card"><h3>3. 큐에서 멈춤</h3><p style="margin:0">영상·CG 송출 큐가 읽기선에 닿으면 자동 정지(Hold). 운영자가 재개할 때까지 대기. 14개 대기 구간을 사람이 일일이 잡지 않아도 됨.</p></div>
+    <div class="card"><h3>4. 촬영 중 편집 금지</h3><p style="margin:0">촬영 모드에서는 어떤 클릭도 글을 바꾸지 못함. 대사 수정은 별도 편집 모드에서만.</p></div>
+    <div class="card"><h3>5. 운영 UI는 보이지 않게</h3><p style="margin:0">운영자 컨트롤은 마우스가 움직일 때만 나타나고 3초 뒤 사라짐. TV에는 대사만 남음.</p></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section>
+  <header><div class="num">05 · 화면 설계</div><h2>출연자 화면(TV) 레이아웃</h2>
+  <p style="color:var(--muted);margin:0">아래 목업은 실제 스크롤 감각을 보여주기 위한 데모 애니메이션임. 하단 컨트롤 바는 마우스가 움직일 때만 나타나는 운영자 레이어.</p></header>
+  <div class="tv" aria-label="프롬프터 v2 화면 목업">
+    <div class="stage">
+      <div class="fade-top"></div>
+      <div class="guide"></div>
+      <div class="hud"><span class="run">▶ RUN</span><span>속도 5</span><span>#6 일로만난42</span><span>−03:40</span></div>
+      <div class="roll">
+        <div class="line"><div class="sec">#1 개회</div></div>
+        <div class="line a"><div class="bar"></div><div><div class="who">김우중</div><div class="txt">안녕하십니까. 창립 42주년 기념식 사회를 맡은 손사지원파트 김우중 수석입니다.</div></div></div>
+        <div class="line b"><div class="bar"></div><div><div class="who">최윤정</div><div class="txt">손사지원파트 최윤정 주임입니다.</div></div></div>
+        <div class="line"><div class="cue">※ 둘이 같이 인사</div></div>
+        <div class="line a"><div class="bar"></div><div><div class="who">김우중</div><div class="txt">주임님, 행사 시작 전에 호남과 영남 직원들의 「일로만난42 - 맛대맛」 영상 보셨죠?</div></div></div>
+        <div class="line b"><div class="bar"></div><div><div class="who">최윤정</div><div class="txt">봤죠. 음식 얘기가 나오니까 시작부터 군침이 돌더라구요.</div></div></div>
+        <div class="line a"><div class="bar"></div><div><div class="who">김우중</div><div class="txt">그럼 주임님은 호남이랑 영남 중에 어느 지역 음식이 더 입에 맞으세요?</div></div></div>
+        <div class="line b"><div class="bar"></div><div><div class="who">최윤정</div><div class="txt">아, 그건 하나만 고르기 어렵죠. 두 지역 다 맛있는 게 너무 많잖아요.</div></div></div>
+        <div class="line"><div class="sec">#2 대표이사 기념사</div></div>
+        <div class="line"><div class="cue"><span class="hold">■ HOLD</span> 심진섭 대표이사 기념사 영상 송출 / 약 5분</div></div>
+        <div class="line a"><div class="bar"></div><div><div class="who">김우중</div><div class="txt">네, 대표이사님의 기념사 잘 들었습니다.</div></div></div>
+        <div class="line b"><div class="bar"></div><div><div class="who">최윤정</div><div class="txt">그럼 이어서 유공자 시상을 진행하겠습니다.</div></div></div>
+        <div class="line a"><div class="bar"></div><div><div class="who">김우중</div><div class="txt">먼저 공로상 수상자분들을 소개하겠습니다.</div></div></div>
+        <div class="line"><div class="cue"><span class="hold">■ HOLD</span> 공로상 수상자 화면 송출</div></div>
+      </div>
+      <div class="fade-bot"></div>
+      <div class="bottom">
+        <div class="prog"><i></i><b style="left:15%"></b><b style="left:18%"></b><b style="left:29%"></b><b style="left:43%"></b><b style="left:56%"></b><b style="left:63%"></b><b style="left:87%"></b><b style="left:94%"></b></div>
+        <div class="ctl"><span class="pri">▶ 재개 Space</span><span>속도 − ↓</span><span>5</span><span>속도 + ↑</span><span>◀ 이전 대사</span><span>다음 대사 ▶</span><span>식순 ▾</span><span>A− A+</span><span>미러 M</span><span>처음 Home</span><span>편집 E</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="legend">
+    <div><i>1</i><div><b>읽기선(가이드)</b> 화면 위에서 33% 위치(방송 관행 25%, 저속 대화형은 30~35%). 양끝 삼각 마커와 얇은 선. 위치·투명도 조절 가능.</div></div>
+    <div><i>2</i><div><b>지나간 대사 페이드</b> 읽기선 위 텍스트는 위로 갈수록 어두워짐. 다음 대사가 아래에서 밝게 올라옴.</div></div>
+    <div><i>3</i><div><b>화자 컬러 바 + 소형 이름</b> 대사 왼쪽 세로 바와 작은 이름표로 화자 전환을 즉시 인지. 대사 본문은 항상 흰색.</div></div>
+    <div><i>4</i><div><b>큐(지시문)</b> 앰버색 박스. 읽지 않는 텍스트임을 색·크기·서체로 구분. 영상 송출 큐에는 HOLD 배지, 도달 시 자동 정지.</div></div>
+    <div><i>5</i><div><b>운영자 HUD</b> 우상단 소형 표시(상태·속도·식순·남은 시간). 무입력 5초 후 투명도 0. H키로 강제 토글.</div></div>
+    <div><i>6</i><div><b>진행 바 + 컨트롤</b> 전체 대본 진행률에 식순·큐 마커를 겹쳐 표시. 마우스 움직임에만 나타남.</div></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section>
+  <header><div class="num">06 · 스크롤 엔진</div><h2>부드럽게, 즉시 반응하게</h2></header>
+  <div class="grid2">
+    <div class="card"><h3>구동 방식</h3>
+      <ul>
+        <li><code>requestAnimationFrame</code> 루프에서 <code>y += 속도(px/s) × Δt</code>. 프레임 드랍이 있어도 시간 기준이라 속도가 일정.</li>
+        <li>브라우저 <code>scrollTo</code>가 아니라 대본 컨테이너에 <code>transform: translate3d(0,-y,0)</code>. 내부 위치는 부동소수로 누산해 저속에서도 끊기지 않고, GPU 합성으로 떨림 없음.</li>
+        <li>정지·재개·속도 변경은 300ms 이징으로 가감속. 텍스트가 덜컥 멈추거나 튀지 않음.</li>
+        <li>단위는 내부적으로 <code>vh/s</code>. TV가 1080p든 4K든 같은 체감 속도.</li>
+      </ul>
+    </div>
+    <div class="card"><h3>이동 동작</h3>
+      <ul>
+        <li><b>넛지</b> 한 줄(줄높이) 단위 위·아래 미세 이동, 250ms 이징. 마우스 휠은 게인(기본 2.0) 설정으로 감도 조절.</li>
+        <li><b>대사 점프</b> 이전·다음 대사의 첫 줄을 읽기선에 맞춰 400ms 이징 스크롤. v1의 「넘김」은 이 부드러운 형태로만 남김.</li>
+        <li><b>식순 점프</b> 드롭다운 또는 숫자키. 점프 후에는 자동 정지 상태로 대기.</li>
+        <li><b>Hold</b> HOLD 큐 요소의 상단이 읽기선에 닿으면 자동 정지 + 배지 점멸. <kbd>Space</kbd>로 재개.</li>
+        <li><b>여기부터</b> 정지 상태에서 대사를 클릭하면 그 대사 첫 줄을 읽기선에 맞춤(Prompt From Here). 촬영 모드에서 클릭은 편집이 아닌 위치 지정.</li>
+        <li><b>끝 도달</b> 마지막 대사 뒤 여백에서 자동 정지. 「대본 끝」 표시.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card"><h3>속도 단계 (기본값 5)</h3>
+    <p style="color:var(--muted)">한국어 발화 약 5자/초, 76px 폰트 한 줄 약 22자 → 한 줄 약 4.4초 → 줄높이 106px 기준 <b>약 24px/s = 2.2vh/s</b>가 자연스러운 기준 속도. 이를 5단계에 두고 위아래로 넓힘. 실제 값은 리허설에서 보정.</p>
+    <div class="speedbar">
+      <div style="height:18%"><span>1.0</span></div><div style="height:28%"><span>1.3</span></div><div style="height:40%"><span>1.6</span></div><div style="height:52%"><span>1.9</span></div><div class="def" style="height:64%"><span>2.2</span></div><div style="height:74%"><span>2.6</span></div><div style="height:82%"><span>3.0</span></div><div style="height:88%"><span>3.5</span></div><div style="height:94%"><span>4.0</span></div><div style="height:100%"><span>4.6</span></div>
+    </div>
+    <div class="axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+    <p style="margin:10px 0 0;font-size:13px;color:var(--muted)">단위 vh/s. 1080p에서 1vh = 10.8px. 글자 크기를 바꾸면 줄높이도 바뀌므로 속도는 「줄/초」가 아닌 절대 vh/s로 유지하고, 운영자가 단계로만 조절.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section>
+  <header><div class="num">07 · 타이포·가시성</div><h2>3m 거리에서 읽히는 글자</h2></header>
+  <div class="grid2">
+    <div class="card"><h3>글자 크기 계산</h3>
+      <dl class="kv">
+        <dt>기준</dt><dd>편안한 판독 글자 높이 ≥ 시거리 ÷ 120 (방송·사이니지 관용 기준)</dd>
+        <dt>3m</dt><dd>글자 높이 25mm 이상</dd>
+        <dt>55인치 1080p</dt><dd>픽셀 피치 0.63mm → 25mm ≈ 40px 글자 높이</dd>
+        <dt>한글 폰트</dt><dd>글자 높이 ≈ em의 0.85 → 최소 font-size 약 47px</dd>
+        <dt>여유 1.6배</dt><dd><b>약 75px = 7vh</b>. v1의 76px은 적정. 4m 이상이면 9vh.</dd>
+        <dt>화면 표시 줄수</dt><dd>7vh × 줄높이 1.45 ≈ 10.2vh/줄 → 약 9줄. 읽기선 위 3줄, 아래 6줄. 뉴스 프롬프터 관행 5~8줄과 부합.</dd>
+      </dl>
+    </div>
+    <div class="card"><h3>서체·색</h3>
+      <ul>
+        <li>서체: 시스템 고딕(Apple SD Gothic Neo / Malgun Gothic / Noto Sans CJK KR). 단일 파일·오프라인 조건상 웹폰트 미사용.</li>
+        <li>굵기 700. v1의 800은 획이 붙어 3m에서 뭉침. 자간 −0.01em, <code>word-break: keep-all</code>로 단어 중간 줄바꿈 방지.</li>
+        <li>한 줄 최대 20~24자. 폭이 넓으면 눈이 좌우로 움직여 카메라 시선이 흔들림. 본문 폭 기본 86%.</li>
+        <li>배경 순검정 <code>#000</code>, 대사 <code>#F4F6F8</code>(순백 대비 눈부심 저감). 지나간 대사 36%.</li>
+        <li>화자 색은 v1 계승: <span class="mcA">김우중 스카이블루</span>, <span class="mcB">최윤정 핑크</span>, 상장 낭독 골드. 색은 바·이름표에만, 본문은 흰색 고정.</li>
+        <li>상장 낭독은 원문 줄바꿈 유지, 가운데 정렬, 골드 이름표. 읽는 속도가 느려지므로 해당 블록 진입 시 속도 −1 자동 적용 옵션.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section>
+  <header><div class="num">08 · 조작 설계</div><h2>키보드·클리커·마우스</h2>
+  <p style="color:var(--muted);margin:0">운영자가 보지 않고도 누를 수 있게 「정지·속도·되감기」 세 가지를 가장 큰 키에 배치. 촬영 모드에서는 어떤 키도 글을 편집하지 않음.</p></header>
+  <div class="keys">
+    <div class="key"><div class="ks"><kbd>Space</kbd></div><div class="d">정지 / 재개<small>가장 자주 쓰는 키. 클릭도 같은 동작</small></div></div>
+    <div class="key"><div class="ks"><kbd>↑</kbd><kbd>↓</kbd></div><div class="d">속도 +1 / −1<small>누르고 있으면 연속 변경</small></div></div>
+    <div class="key"><div class="ks"><kbd>←</kbd><kbd>→</kbd></div><div class="d">이전 / 다음 대사 시작으로<small>400ms 이징. 점프 후 정지 상태 유지</small></div></div>
+    <div class="key"><div class="ks"><kbd>Shift</kbd>+<kbd>↑</kbd><kbd>↓</kbd> · 휠</div><div class="d">한 줄 넛지<small>진행 중이면 정지 없이 위치만 보정</small></div></div>
+    <div class="key"><div class="ks"><kbd>Backspace</kbd></div><div class="d">마지막 재생 시작점으로 되감기<small>NG 후 재촬영용. 방송 프롬프터의 Reset Story에 해당</small></div></div>
+    <div class="key"><div class="ks"><kbd>1</kbd>…<kbd>8</kbd></div><div class="d">식순 #1~#8로 점프<small>드롭다운도 병행</small></div></div>
+    <div class="key"><div class="ks"><kbd>Home</kbd><kbd>End</kbd></div><div class="d">대본 처음 / 끝<small>Home은 촬영 시작 리셋 겸용</small></div></div>
+    <div class="key"><div class="ks"><kbd>+</kbd><kbd>−</kbd></div><div class="d">글자 크기 ±0.5vh<small>읽기선의 글자는 그 자리 유지(앵커 재계산)</small></div></div>
+    <div class="key"><div class="ks"><kbd>F</kbd><kbd>M</kbd><kbd>H</kbd><kbd>B</kbd></div><div class="d">전체화면 / 미러 / HUD 토글 / 블랙아웃<small>미러는 빔스플리터 유리용, 필요 시만</small></div></div>
+    <div class="key"><div class="ks"><kbd>C</kbd></div><div class="d">3초 카운트다운 후 자동 시작<small>큐 사인 맞추기용</small></div></div>
+    <div class="key"><div class="ks"><kbd>E</kbd></div><div class="d">편집 모드 전환<small>확인 대화 후 전환. 촬영 모드에서 실수로 못 들어가게</small></div></div>
+    <div class="key"><div class="ks"><kbd>Esc</kbd></div><div class="d">즉시 정지<small>전체화면 해제와 겹치므로 정지만 담당</small></div></div>
+  </div>
+  <div class="card"><h3>프레젠터 클리커(2버튼) 매핑</h3>
+    <p>대부분의 무선 프레젠터는 <kbd>PageDown</kbd> / <kbd>PageUp</kbd>과 블랙아웃 <kbd>B</kbd>, <kbd>F5</kbd>/<kbd>Esc</kbd>만 보냄. 버튼이 둘뿐이므로 설정에서 모드 선택.</p>
+    <div class="tw"><table><thead><tr><th>모드</th><th>다음(PageDown)</th><th>이전(PageUp)</th><th>적합한 상황</th></tr></thead>
+    <tbody>
+      <tr><td>흐름 모드 <span class="tag t-ok">기본</span></td><td>정지 / 재개</td><td>한 줄 되감기</td><td>연속 스크롤로 진행, 큐에서 멈췄다가 재개</td></tr>
+      <tr><td>대사 모드</td><td>다음 대사로 부드럽게 이동</td><td>이전 대사로</td><td>대사 단위로 운영자가 박자를 잡을 때</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section>
+  <header><div class="num">09 · 모드·데이터·파일</div><h2>촬영 모드와 편집 모드의 분리</h2></header>
+  <div class="grid2">
+    <div class="card"><h3>촬영 모드 (기본)</h3>
+      <ul>
+        <li>텍스트 선택·편집 불가. 우클릭 메뉴 차단. 커서 자동 숨김.</li>
+        <li>설정(속도·글자·폭·미러·클리커 모드)은 <code>localStorage</code>에 저장.</li>
+        <li>진행 위치는 저장하지 않음. 열 때마다 처음부터. 대신 「마지막 위치로」 버튼 1개.</li>
+        <li>화면 잠김 방지: Wake Lock API로 촬영 중 TV 절전·화면보호기 진입 차단.</li>
+      </ul>
+    </div>
+    <div class="card"><h3>편집 모드 (E키 · 확인 후)</h3>
+      <ul>
+        <li>대사 텍스트 수정, 큐의 HOLD 여부 토글, 대사 순서는 고정.</li>
+        <li>수정본은 v1처럼 HTML로 내려받기. 원문 해시로 어느 대본에서 파생됐는지 표기.</li>
+        <li>되돌리기·다시 실행은 편집 모드 안에서만 활성.</li>
+        <li>편집 화면은 밝은 배경의 목록형. 촬영 화면과 시각적으로 완전히 다르게 해 지금 어느 모드인지 착각하지 않게.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card"><h3>데이터 스키마 (v1 계승 + 확장)</h3>
+    <div class="inset"><pre style="margin:0;font-family:var(--mono);font-size:13px;line-height:1.6;overflow-x:auto">items[]        id · speaker · kind(dialogue|award) · section · text · before[]
+before[]       kind(heading|cue) · text · <b>hold:boolean</b>   ← 신규. 「송출」 포함 큐는 기본 true
+headings[]     index · text                             ← 식순 점프·진행 바 마커
+settings       speedLevel · fontVh · widthPct · mirror · guidePct · clickerMode · fadePast · autoHold
+<s>gaze</s>           읽기만 하고 화면에 표시하지 않음 (스키마 호환 유지)</pre></div>
+  </div>
+  <div class="card"><h3>선택 사양: 운영자 창 분리</h3>
+    <p style="margin:0">같은 노트북에서 TV를 확장 화면으로 쓸 때, 운영자 창(노트북)과 출연자 창(TV)을 <code>BroadcastChannel</code>로 동기화. 운영자 창에는 전체 대본 목록·속도·타이머·다음 큐가 항상 보이고, TV에는 대사만 남음. 11장 결정 사항 A에 해당.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section>
+  <header><div class="num">10 · 제작 단계</div><h2>만든다면 이 순서로</h2></header>
+  <div class="steps">
+    <div class="step"><div><b>스크롤 엔진 + 출연자 화면</b><small>rAF 엔진, 읽기선, 페이드, 화자 바, 큐 박스. v1 JSON 그대로 로드. 여기까지만으로도 촬영 가능.</small></div></div>
+    <div class="step"><div><b>운영자 레이어</b><small>자동 숨김 컨트롤 바, HUD, 진행 바, 키맵, 클리커 모드, Hold 자동 정지.</small></div></div>
+    <div class="step"><div><b>편집 모드</b><small>텍스트 수정, HOLD 토글, 수정본 저장. v1의 편집 로직 재사용.</small></div></div>
+    <div class="step"><div><b>리허설 보정</b><small>실제 TV·거리에서 기본 속도·글자 크기·읽기선 위치 확정. 설정값을 파일 기본값으로 굽기.</small></div></div>
+    <div class="step"><div><b>선택 사양</b><small>운영자 창 분리, 미러, 카운트다운, 상장 낭독 자동 감속.</small></div></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section>
+  <header><div class="num">11 · 결정 필요</div><h2>제작 전에 정해야 할 다섯 가지</h2>
+  <p style="color:var(--muted);margin:0">채팅으로 번호·알파벳만 답하면 됨. 예: 「A2 B1 C1 D1 E1」</p></header>
+  <div class="decide">
+    <div class="opt"><div class="l">A</div><div><b>운영자 화면 구성</b><br>1. 단일 창. TV 화면에 자동 숨김 컨트롤 바·HUD <span class="rec">권장 · 단순</span><br>2. 운영자 창 분리. 노트북에서 조작, TV에는 대사만 (확장 화면 필요)</div></div>
+    <div class="opt"><div class="l">B</div><div><b>영상 송출 큐 자동 정지(Hold)</b><br>1. 켬. 큐에 닿으면 자동 정지, Space로 재개 <span class="rec">권장</span><br>2. 끔. 운영자가 직접 정지</div></div>
+    <div class="opt"><div class="l">C</div><div><b>화자 표시 방식</b><br>1. 왼쪽 컬러 바 + 소형 이름표, 본문은 흰색 <span class="rec">권장 · 가독</span><br>2. 대사 본문 자체를 화자 색으로<br>3. 이름표 없이 컬러 바만</div></div>
+    <div class="opt"><div class="l">D</div><div><b>지나간 대사 처리</b><br>1. 위로 갈수록 페이드 <span class="rec">권장</span><br>2. 밝기 그대로 유지</div></div>
+    <div class="opt"><div class="l">E</div><div><b>입력 장치</b><br>1. 키보드·마우스만<br>2. 프레젠터 클리커도 사용 (기종 알려주면 키 확인)<br>3. 둘 다</div></div>
+  </div>
+</section>
+
+<footer>v2 설계안 · 구현 전 검토용 · 원본 대본 해시 de617146…a3bca</footer>
+</div>
+</body></html>

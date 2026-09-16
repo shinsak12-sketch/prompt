@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="창립 42주년 기념식 사회자 프롬프터 · 연속 스크롤형">
+<meta name="robots" content="noindex">
+<title>창립 42주년 프롬프터</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23000'/%3E%3Cpath d='M6 10h20M6 16h14M6 22h20' stroke='%23F0B252' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-mode="show">
+
+<!-- ========== 촬영 모드 ========== -->
+<div id="stage" aria-label="프롬프터 화면">
+  <div id="mirror">
+    <div id="roll"></div>
+    <div id="fade-past" aria-hidden="true"></div>
+    <div id="guide" aria-hidden="true"><i class="l"></i><i class="r"></i></div>
+  </div>
+
+  <div id="hud" class="ui" aria-live="polite">
+    <span id="hud-state" class="state stopped"><i></i><b>STOP</b></span>
+    <span id="hud-speed">속도 <b>5</b></span>
+    <span id="hud-section">—</span>
+    <span id="hud-time" title="경과 / 남은 시간"><b id="hud-elapsed">00:00</b> · <span id="hud-remain">−00:00</span></span>
+  </div>
+
+  <div id="hold-badge" class="ui" hidden><span class="dot"></span>HOLD · 영상 송출 대기 · <kbd>Space</kbd> 재개</div>
+  <div id="toast" class="ui" hidden></div>
+
+  <div id="controls" class="ui">
+    <div id="progress" title="클릭하면 해당 위치로 이동"><div class="fill"></div><div class="markers"></div></div>
+    <div class="bar">
+      <button id="btn-toggle" class="pri" title="Space">▶ 시작</button>
+      <div class="group" title="↑ ↓">
+        <button id="btn-slower" aria-label="느리게">−</button>
+        <output id="speed-out">5</output>
+        <button id="btn-faster" aria-label="빠르게">+</button>
+      </div>
+      <div class="group">
+        <button id="btn-prev" title="← 이전 대사">◀ 대사</button>
+        <button id="btn-next" title="→ 다음 대사">대사 ▶</button>
+      </div>
+      <button id="btn-back" title="Backspace · 마지막 재생 시작점으로">↶ 시작점</button>
+      <select id="sel-section" aria-label="식순으로 이동"><option value="">식순 이동…</option></select>
+      <span class="spacer"></span>
+      <div class="group">
+        <button id="btn-font-minus" title="− 글자 작게">A−</button>
+        <output id="font-out">7.0</output>
+        <button id="btn-font-plus" title="+ 글자 크게">A+</button>
+      </div>
+      <button id="btn-countdown" title="C · 3초 카운트다운 후 시작">⏱ 3초</button>
+      <button id="btn-blank" title="B · 블랙아웃">■ 블랭크</button>
+      <button id="btn-mirror" title="M · 좌우 반전">⇋ 미러</button>
+      <button id="btn-full" title="F · 전체화면">⛶ 전체</button>
+      <button id="btn-settings" title="설정">⚙</button>
+      <button id="btn-edit" title="E · 편집 모드">✎ 편집</button>
+      <button id="btn-help" title="? · 단축키">?</button>
+    </div>
+  </div>
+
+  <aside id="settings" class="ui panel" hidden>
+    <header><h2>설정</h2><button class="close" data-close="settings" aria-label="닫기">✕</button></header>
+    <div class="row"><label>읽기선 위치 <output id="guide-out">33</output>%</label><input id="in-guide" type="range" min="15" max="55" step="1"></div>
+    <div class="row"><label>본문 폭 <output id="width-out">86</output>%</label><input id="in-width" type="range" min="50" max="96" step="2"></div>
+    <div class="row"><label>줄 간격 <output id="lh-out">1.45</output></label><input id="in-lh" type="range" min="1.2" max="1.8" step="0.05"></div>
+    <div class="row"><label>휠 감도 <output id="gain-out">2.0</output></label><input id="in-gain" type="range" min="0.5" max="5" step="0.5"></div>
+    <div class="row toggle"><label for="in-fade">지나간 대사 페이드</label><input id="in-fade" type="checkbox"></div>
+    <div class="row toggle"><label for="in-hold">영상 큐 자동 정지(HOLD)</label><input id="in-hold" type="checkbox"></div>
+    <div class="row toggle"><label for="in-hud">HUD 항상 표시</label><input id="in-hud" type="checkbox"></div>
+    <div class="row"><label for="in-clicker">클리커 PageDown / PageUp</label>
+      <select id="in-clicker"><option value="flow">흐름 모드 · 정지/재개 · 한 줄 되감기</option><option value="line">대사 모드 · 다음 대사 · 이전 대사</option></select></div>
+    <div class="row actions"><button id="btn-reset-settings">기본값으로</button><button id="btn-home">대본 처음으로</button></div>
+  </aside>
+
+  <aside id="help" class="ui panel" hidden>
+    <header><h2>단축키</h2><button class="close" data-close="help" aria-label="닫기">✕</button></header>
+    <table>
+      <tr><td><kbd>Space</kbd> · 클릭</td><td>정지 / 재개</td></tr>
+      <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>속도 +1 / −1</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>이전 / 다음 대사 시작으로</td></tr>
+      <tr><td><kbd>Shift</kbd>+<kbd>↑↓</kbd> · 휠</td><td>한 줄 넛지</td></tr>
+      <tr><td><kbd>Backspace</kbd></td><td>마지막 재생 시작점으로</td></tr>
+      <tr><td><kbd>1</kbd>…<kbd>8</kbd></td><td>식순 #1~#8로 이동</td></tr>
+      <tr><td><kbd>Home</kbd> <kbd>End</kbd></td><td>대본 처음 / 끝</td></tr>
+      <tr><td><kbd>+</kbd> <kbd>−</kbd></td><td>글자 크기</td></tr>
+      <tr><td><kbd>C</kbd></td><td>3초 카운트다운 후 시작</td></tr>
+      <tr><td><kbd>B</kbd></td><td>블랭크(검은 화면)</td></tr>
+      <tr><td><kbd>F</kbd> <kbd>M</kbd> <kbd>H</kbd></td><td>전체화면 / 미러 / HUD 고정</td></tr>
+      <tr><td><kbd>E</kbd></td><td>편집 모드</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>즉시 정지 · 패널 닫기</td></tr>
+      <tr><td>정지 중 대사 클릭</td><td>그 대사부터 (Prompt From Here)</td></tr>
+      <tr><td>클리커 <kbd>PgDn</kbd> <kbd>PgUp</kbd></td><td>설정의 클리커 모드에 따름</td></tr>
+    </table>
+  </aside>
+
+  <div id="countdown" hidden><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="46"/><circle class="arc" cx="50" cy="50" r="46"/></svg><b>3</b></div>
+  <div id="blank" hidden></div>
+  <div id="endcap" class="ui" hidden>대본 끝</div>
+</div>
+
+<!-- ========== 편집 모드 ========== -->
+<div id="editor" hidden>
+  <header class="ed-top">
+    <div><h1>대본 편집</h1><p id="ed-meta"></p></div>
+    <div class="ed-actions">
+      <button id="ed-export">JSON 내보내기</button>
+      <label class="file">가져오기<input id="ed-import" type="file" accept="application/json,.json"></label>
+      <button id="ed-restore" class="danger">원본으로 복원</button>
+      <button id="ed-done" class="pri">촬영 모드로 ▶</button>
+    </div>
+  </header>
+  <p class="ed-hint">글을 고치면 즉시 이 브라우저에 저장됨. 다른 PC에서 쓰려면 JSON 내보내기 → 가져오기. HOLD를 켠 큐는 촬영 중 읽기선에 닿으면 자동 정지.</p>
+  <div id="ed-list"></div>
+</div>
+
+<script src="js/script-data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
