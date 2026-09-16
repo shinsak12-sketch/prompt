@@ -22,7 +22,7 @@ kbd{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.1);bord
 #stage.idle{cursor:none}
 #mirror{position:absolute;inset:0;overflow:hidden}
 #mirror.flip{transform:scaleX(-1)}
-#roll{position:absolute;left:50%;top:0;width:var(--width);transform:translate3d(-50%,0,0);will-change:transform;padding-top:var(--guide);padding-bottom:100vh;font-size:var(--font);line-height:var(--lh);font-weight:700;letter-spacing:-.012em;word-break:keep-all;overflow-wrap:anywhere}
+#roll{position:absolute;left:50%;top:0;width:var(--width);transform:translate3d(-50%,0,0);will-change:transform;padding-top:var(--guide);padding-bottom:100vh;font-size:var(--font);line-height:var(--lh);font-weight:700;letter-spacing:-.012em;word-break:normal;overflow-wrap:anywhere;line-break:normal}
 #roll .blk{margin-bottom:.55em}
 /* 화자 대사: 왼쪽 이름 열 + 화자 색 본문 */
 .line{display:grid;grid-template-columns:var(--name-w) minmax(0,1fr);column-gap:.35em;cursor:pointer;border-radius:.15em;transition:background .2s;color:var(--a)}
