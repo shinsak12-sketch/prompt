@@ -35,12 +35,12 @@ kbd{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.1);bord
 #stage:not(.running):not(.idle) .line:hover{background:rgba(255,255,255,.05)}
 .line.target{background:rgba(240,178,82,.12)}
 /* 큐·식순 */
-.cue{font-size:.42em;line-height:1.35;font-weight:600;color:var(--cue);background:rgba(240,178,82,.09);border:1px solid rgba(240,178,82,.3);border-left:.28em solid var(--cue);border-radius:.35em;padding:.45em .8em;display:flex;gap:.7em;align-items:center;letter-spacing:0;white-space:pre-wrap}
+.cue{font-size:var(--name-size);line-height:1.35;font-weight:600;color:var(--cue);background:rgba(240,178,82,.09);border:1px solid rgba(240,178,82,.3);border-left:.28em solid var(--cue);border-radius:.35em;padding:.45em .8em;display:flex;gap:.7em;align-items:center;letter-spacing:0;white-space:pre-wrap}
 .cue.hold{border-color:var(--cue);background:rgba(240,178,82,.14)}
 .cue .badge{flex:none;font-family:var(--mono);font-size:.78em;font-weight:700;background:var(--cue);color:#1a1200;border-radius:.3em;padding:.05em .5em}
-.sec{font-family:var(--mono);font-size:.3em;line-height:1.4;letter-spacing:.14em;font-weight:600;color:var(--fg-dim);border-bottom:1px solid rgba(244,246,248,.14);padding:.9em 0 .5em;margin-bottom:1em!important}
-.sec.sub{font-size:.28em;border-bottom:0;color:rgba(244,246,248,.42);padding:.4em 0 0;margin-bottom:.6em!important;letter-spacing:.08em}
-.endmark{font-size:.4em;color:var(--fg-dim);text-align:center;padding:2em 0;letter-spacing:.2em;font-family:var(--mono)}
+.sec{font-family:var(--mono);font-size:calc(var(--name-size) * .8);line-height:1.4;letter-spacing:.14em;font-weight:600;color:var(--fg-dim);border-bottom:1px solid rgba(244,246,248,.14);padding:.9em 0 .5em;margin-bottom:1em!important}
+.sec.sub{font-size:calc(var(--name-size) * .7);border-bottom:0;color:rgba(244,246,248,.42);padding:.4em 0 0;margin-bottom:.6em!important;letter-spacing:.08em}
+.endmark{font-size:var(--name-size);color:var(--fg-dim);text-align:center;padding:2em 0;letter-spacing:.2em;font-family:var(--mono)}
 /* 페이드·읽기선 */
 #fade-past{position:absolute;left:0;right:0;top:0;height:var(--guide);pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.82) 0%,rgba(0,0,0,.62) 45%,rgba(0,0,0,.28) 85%,rgba(0,0,0,0) 100%);opacity:1;transition:opacity .3s}
 #stage.nofade #fade-past{opacity:0}
