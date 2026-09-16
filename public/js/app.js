@@ -39,8 +39,7 @@ function render() {
     }
     const cls = SRC.speakers[it.speaker] || 'a';
     const n = el('div', 'line ' + cls); n.dataset.index = index;
-    n.append(el('i', 'bar'));
-    const body = el('div'); body.append(el('div', 'who', it.speaker), el('div', 'txt', textOf(it))); n.append(body);
+    n.append(el('div', 'who', it.speaker), el('div', 'txt', textOf(it)));
     push(n, { kind: 'line', item: it, index }); lineEls.push(n);
   });
   for (const t of SRC.tail) push(t.kind === 'cue' ? cueNode(t) : el('div', 'sec', t.text), { kind: t.kind, cue: t });
