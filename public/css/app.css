@@ -3,7 +3,7 @@
   --bg:#000; --fg:#F4F6F8; --fg-dim:rgba(244,246,248,.5);
   --a:#8BD1FF; --b:#FFAFD3; --award:#F5D578; --cue:#F0B252;
   --ui-bg:rgba(16,18,22,.86); --ui-line:rgba(255,255,255,.12); --ui-fg:#E6E9EE; --ui-muted:#9AA3B0;
-  --font:7vh; --lh:1.45; --width:86%; --guide:33vh;
+  --font:7vh; --lh:1.45; --width:86%; --guide:33vh; --name-w:8vw; --name-size:2.6vh;
   --sans:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Noto Sans CJK KR",sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --ease:cubic-bezier(.2,.7,.2,1);
@@ -25,11 +25,11 @@ kbd{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.1);bord
 #roll{position:absolute;left:50%;top:0;width:var(--width);transform:translate3d(-50%,0,0);will-change:transform;padding-top:var(--guide);padding-bottom:100vh;font-size:var(--font);line-height:var(--lh);font-weight:700;letter-spacing:-.012em;word-break:keep-all;overflow-wrap:anywhere}
 #roll .blk{margin-bottom:.55em}
 /* 화자 대사: 왼쪽 이름 열 + 화자 색 본문 */
-.line{display:grid;grid-template-columns:2.3em 1fr;column-gap:.35em;cursor:pointer;border-radius:.15em;transition:background .2s;color:var(--a)}
+.line{display:grid;grid-template-columns:var(--name-w) minmax(0,1fr);column-gap:.35em;cursor:pointer;border-radius:.15em;transition:background .2s;color:var(--a)}
 .line.b{color:var(--b)}
 .line.award{color:var(--award)}
 .line .bar{display:none}
-.line .who{font-size:.42em;line-height:1.3;font-weight:800;letter-spacing:.01em;color:inherit;padding-top:.62em;text-align:right;padding-right:.5em;border-right:.12em solid currentColor;opacity:.92;word-break:keep-all}
+.line .who{font-size:var(--name-size);line-height:1.3;font-weight:800;letter-spacing:.01em;color:inherit;padding-top:calc((var(--font) * var(--lh) - var(--name-size) * 1.3) / 2);text-align:right;padding-right:.5em;border-right:3px solid currentColor;opacity:.92;word-break:keep-all;overflow-wrap:normal}
 .line .txt{white-space:pre-wrap;color:inherit}
 .line.award .txt{text-align:center;font-size:.92em;padding:.15em .4em}
 #stage:not(.running):not(.idle) .line:hover{background:rgba(255,255,255,.05)}
