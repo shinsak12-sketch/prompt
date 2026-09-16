@@ -3,7 +3,8 @@
 (() => {
 const $ = id => document.getElementById(id);
 const SRC = window.PROMPTER_SCRIPT;
-const LS = { settings: 'prompter42:settings', edits: 'prompter42:edits', holds: 'prompter42:holds' };
+const V = 'prompter42:' + (SRC.version || 1);
+const LS = { settings: 'prompter42:settings', edits: V + ':edits', holds: V + ':holds' };
 const SPEED_VH = [1.0, 1.3, 1.6, 1.9, 2.2, 2.6, 3.0, 3.5, 4.0, 4.6, 5.3, 6.1, 7.0, 8.0, 9.2, 10.6, 12.2, 14.0, 16.1, 18.5]; // 단계 1~20, 단위 vh/s
 const DEFAULTS = { level: 5, fontVh: 7, widthPct: 86, guidePct: 33, lineHeight: 1.45, gain: 2, fade: true, breakAll: false, autoHold: true, hudPin: false, mirror: false, clicker: 'flow' };
 
@@ -245,7 +246,7 @@ window.addEventListener('keydown', e => {
   const lower = k.length === 1 ? k.toLowerCase() : k;
   const letters = { c: countdown, b: () => blank(), f: fullscreen, m: () => setSetting('mirror', !settings.mirror), h: () => { setSetting('hudPin', !settings.hudPin); toast(settings.hudPin ? 'HUD 고정' : 'HUD 자동 숨김'); }, e: enterEdit };
   let fn = act[k] || letters[lower];
-  if (!fn && /^[1-8]$/.test(k)) fn = () => goSection(+k - 1);
+  if (!fn && /^[1-9]$/.test(k) && +k <= SRC.sections.length) fn = () => goSection(+k - 1);
   if (!fn) return;
   e.preventDefault(); if (e.repeat && !['ArrowUp', 'ArrowDown', 'PageUp'].includes(k)) return;
   wake(); fn();
