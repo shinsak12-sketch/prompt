@@ -4,13 +4,14 @@
 const $ = id => document.getElementById(id);
 const SRC = window.PROMPTER_SCRIPT;
 const LS = { settings: 'prompter42:settings', edits: 'prompter42:edits', holds: 'prompter42:holds' };
-const SPEED_VH = [1.0, 1.3, 1.6, 1.9, 2.2, 2.6, 3.0, 3.5, 4.0, 4.6]; // 단계 1~10, 단위 vh/s
+const SPEED_VH = [1.0, 1.3, 1.6, 1.9, 2.2, 2.6, 3.0, 3.5, 4.0, 4.6, 5.3, 6.1, 7.0, 8.0, 9.2, 10.6, 12.2, 14.0, 16.1, 18.5]; // 단계 1~20, 단위 vh/s
 const DEFAULTS = { level: 5, fontVh: 7, widthPct: 86, guidePct: 33, lineHeight: 1.45, gain: 2, fade: true, autoHold: true, hudPin: false, mirror: false, clicker: 'flow' };
 
 /* ---------- 저장 ---------- */
 const load = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v && typeof v === 'object' ? v : fb; } catch (_) { return fb; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
 let settings = { ...DEFAULTS, ...load(LS.settings, {}) };
+settings.level = Math.min(SPEED_VH.length, Math.max(1, Math.round(Number(settings.level) || DEFAULTS.level)));
 let edits = load(LS.edits, {});   // itemId -> text
 let holds = load(LS.holds, {});   // cueId  -> bool
 const textOf = it => edits[it.id] ?? it.text;
@@ -209,7 +210,7 @@ $('in-clicker').onchange = e => setSetting('clicker', e.target.value);
 SRC.sections.forEach((s, i) => { const o = el('option', '', s.text); o.value = i; $('sel-section').append(o); });
 $('sel-section').onchange = e => { if (e.target.value !== '') goSection(+e.target.value); e.target.value = ''; e.target.blur(); };
 $('progress').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); tweenTo((e.clientX - r.left) / r.width * state.endY, 400); });
-function setLevel(d) { setSetting('level', Math.min(10, Math.max(1, settings.level + d))); toast('속도 ' + settings.level); }
+function setLevel(d) { setSetting('level', Math.min(SPEED_VH.length, Math.max(1, settings.level + d))); toast('속도 ' + settings.level); }
 
 // 무대 클릭: 진행 중 → 정지, 정지 중 대사 클릭 → 그 대사부터, 빈 곳 클릭 → 시작
 mirror.addEventListener('click', e => {
