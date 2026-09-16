@@ -5,7 +5,7 @@ const $ = id => document.getElementById(id);
 const SRC = window.PROMPTER_SCRIPT;
 const LS = { settings: 'prompter42:settings', edits: 'prompter42:edits', holds: 'prompter42:holds' };
 const SPEED_VH = [1.0, 1.3, 1.6, 1.9, 2.2, 2.6, 3.0, 3.5, 4.0, 4.6, 5.3, 6.1, 7.0, 8.0, 9.2, 10.6, 12.2, 14.0, 16.1, 18.5]; // 단계 1~20, 단위 vh/s
-const DEFAULTS = { level: 5, fontVh: 7, widthPct: 86, guidePct: 33, lineHeight: 1.45, gain: 2, fade: true, autoHold: true, hudPin: false, mirror: false, clicker: 'flow' };
+const DEFAULTS = { level: 5, fontVh: 7, widthPct: 86, guidePct: 33, lineHeight: 1.45, gain: 2, fade: true, breakAll: false, autoHold: true, hudPin: false, mirror: false, clicker: 'flow' };
 
 /* ---------- 저장 ---------- */
 const load = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v && typeof v === 'object' ? v : fb; } catch (_) { return fb; } };
@@ -74,7 +74,7 @@ function applySettings() {
   const r = document.documentElement.style;
   r.setProperty('--font', settings.fontVh + 'vh'); r.setProperty('--width', settings.widthPct + '%');
   r.setProperty('--guide', settings.guidePct + 'vh'); r.setProperty('--lh', settings.lineHeight);
-  stage.classList.toggle('nofade', !settings.fade); stage.classList.toggle('hud-pin', settings.hudPin);
+  stage.classList.toggle('nofade', !settings.fade); stage.classList.toggle('breakall', !!settings.breakAll); stage.classList.toggle('hud-pin', settings.hudPin);
   mirror.classList.toggle('flip', settings.mirror); $('btn-mirror').classList.toggle('active', settings.mirror);
   $('speed-out').textContent = settings.level; $('hud-speed').querySelector('b').textContent = settings.level;
   $('font-out').textContent = settings.fontVh.toFixed(1);
@@ -82,7 +82,7 @@ function applySettings() {
   $('in-width').value = settings.widthPct; $('width-out').textContent = settings.widthPct;
   $('in-lh').value = settings.lineHeight; $('lh-out').textContent = settings.lineHeight.toFixed(2);
   $('in-gain').value = settings.gain; $('gain-out').textContent = settings.gain.toFixed(1);
-  $('in-fade').checked = settings.fade; $('in-hold').checked = settings.autoHold; $('in-hud').checked = settings.hudPin; $('in-clicker').value = settings.clicker;
+  $('in-fade').checked = settings.fade; $('in-break').checked = !!settings.breakAll; $('in-hold').checked = settings.autoHold; $('in-hud').checked = settings.hudPin; $('in-clicker').value = settings.clicker;
   save(LS.settings, settings);
 }
 function setSetting(key, val, reflow) { if (reflow) relayout(() => { settings[key] = val; applySettings(); }); else { settings[key] = val; applySettings(); } }
@@ -204,6 +204,7 @@ $('in-width').oninput = e => setSetting('widthPct', +e.target.value, true);
 $('in-lh').oninput = e => setSetting('lineHeight', +e.target.value, true);
 $('in-gain').oninput = e => setSetting('gain', +e.target.value);
 $('in-fade').onchange = e => setSetting('fade', e.target.checked);
+$('in-break').onchange = e => setSetting('breakAll', e.target.checked, true);
 $('in-hold').onchange = e => setSetting('autoHold', e.target.checked);
 $('in-hud').onchange = e => setSetting('hudPin', e.target.checked);
 $('in-clicker').onchange = e => setSetting('clicker', e.target.value);
