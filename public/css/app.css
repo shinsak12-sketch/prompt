@@ -3,7 +3,7 @@
   --bg:#000; --fg:#F4F6F8; --fg-dim:rgba(244,246,248,.5);
   --a:#8BD1FF; --b:#FFAFD3; --award:#F5D578; --cue:#F0B252;
   --ui-bg:rgba(16,18,22,.86); --ui-line:rgba(255,255,255,.12); --ui-fg:#E6E9EE; --ui-muted:#9AA3B0;
-  --font:7vh; --lh:1.45; --width:86%; --guide:33vh; --name-size:calc(1.2vh + var(--font) * 0.2); --name-w:calc(var(--name-size) * 5.5);
+  --font:7vh; --lh:1.45; --width:86%; --guide:33vh; --name-w:8vw; --name-size:clamp(2vh, 1.2vh + var(--font) * 0.2, var(--name-w) / 3.4);
   --sans:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Noto Sans CJK KR",sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --ease:cubic-bezier(.2,.7,.2,1);
