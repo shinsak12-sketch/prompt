@@ -195,7 +195,7 @@ $('btn-toggle').onclick = toggle; $('btn-slower').onclick = () => setLevel(-1); 
 $('btn-prev').onclick = () => prevNextLine(-1); $('btn-next').onclick = () => prevNextLine(1);
 $('btn-back').onclick = () => { tweenTo(state.startY, 400); toast('재생 시작점'); };
 $('btn-font-minus').onclick = () => setSetting('fontVh', Math.max(3, +(settings.fontVh - 0.5).toFixed(1)), true);
-$('btn-font-plus').onclick = () => setSetting('fontVh', Math.min(14, +(settings.fontVh + 0.5).toFixed(1)), true);
+$('btn-font-plus').onclick = () => setSetting('fontVh', Math.min(24, +(settings.fontVh + 0.5).toFixed(1)), true);
 $('btn-countdown').onclick = countdown; $('btn-blank').onclick = () => blank(); $('btn-mirror').onclick = () => setSetting('mirror', !settings.mirror);
 $('btn-full').onclick = fullscreen; $('btn-settings').onclick = () => panel('settings'); $('btn-help').onclick = () => panel('help'); $('btn-edit').onclick = enterEdit;
 $('btn-home').onclick = home; $('btn-reset-settings').onclick = () => relayout(() => { settings = { ...DEFAULTS }; applySettings(); });
