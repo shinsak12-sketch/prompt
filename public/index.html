@@ -43,6 +43,7 @@
         <button id="btn-prev" title="← 이전 대사">◀ 대사</button>
         <button id="btn-next" title="→ 다음 대사">대사 ▶</button>
       </div>
+      <button id="btn-ff" title="누르고 있는 동안 빨리감기 · 화면을 길게 눌러도 됨 · ] 키">▶▶ 빨리감기</button>
       <button id="btn-back" title="Backspace · 마지막 재생 시작점으로">↶ 시작점</button>
       <select id="sel-section" aria-label="식순으로 이동"><option value="">식순 이동…</option></select>
       <span class="spacer"></span>
@@ -67,6 +68,7 @@
     <div class="row"><label>본문 폭 <output id="width-out">86</output>%</label><input id="in-width" type="range" min="50" max="96" step="2"></div>
     <div class="row"><label>줄 간격 <output id="lh-out">1.45</output></label><input id="in-lh" type="range" min="1.2" max="1.8" step="0.05"></div>
     <div class="row"><label>휠 감도 <output id="gain-out">2.0</output></label><input id="in-gain" type="range" min="0.5" max="5" step="0.5"></div>
+    <div class="row"><label>지시문 구간 빨리 넘김 <output id="skim-out">3.5</output>배</label><input id="in-skim" type="range" min="1" max="8" step="0.5"></div>
     <div class="row toggle"><label for="in-fade">지나간 대사 페이드</label><input id="in-fade" type="checkbox"></div>
     <div class="row toggle"><label for="in-break">단어 중간 끊김 허용 (줄 끝까지 채움)</label><input id="in-break" type="checkbox"></div>
     <div class="row toggle"><label for="in-hold">영상 큐 자동 정지(HOLD)</label><input id="in-hold" type="checkbox"></div>
@@ -81,8 +83,9 @@
     <table>
       <tr><td><kbd>Space</kbd> · 클릭</td><td>정지 / 재개</td></tr>
       <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>속도 +1 / −1 (1~20)</td></tr>
-      <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>이전 / 다음 대사 시작으로</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>이전 / 다음 대사로 (재생 중에도 멈추지 않음)</td></tr>
       <tr><td><kbd>Shift</kbd>+<kbd>↑↓</kbd> · 휠</td><td>한 줄 넛지</td></tr>
+      <tr><td>화면 길게 누름 · <kbd>]</kbd></td><td>누르고 있는 동안 빨리감기</td></tr>
       <tr><td><kbd>Backspace</kbd></td><td>마지막 재생 시작점으로</td></tr>
       <tr><td><kbd>1</kbd>…<kbd>7</kbd></td><td>식순 #1~#7로 이동</td></tr>
       <tr><td><kbd>Home</kbd> <kbd>End</kbd></td><td>대본 처음 / 끝</td></tr>

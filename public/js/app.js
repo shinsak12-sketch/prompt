@@ -6,7 +6,9 @@ const SRC = window.PROMPTER_SCRIPT;
 const V = 'prompter42:' + (SRC.version || 1);
 const LS = { settings: 'prompter42:settings', edits: V + ':edits', holds: V + ':holds' };
 const SPEED_VH = [1.0, 1.3, 1.6, 1.9, 2.2, 2.6, 3.0, 3.5, 4.0, 4.6, 5.3, 6.1, 7.0, 8.0, 9.2, 10.6, 12.2, 14.0, 16.1, 18.5]; // 단계 1~20, 단위 vh/s
-const DEFAULTS = { level: 5, fontVh: 7, widthPct: 86, guidePct: 33, lineHeight: 1.45, gain: 2, fade: true, breakAll: false, autoHold: true, hudPin: false, mirror: false, clicker: 'flow' };
+const FF_MULT = 8;      // 클릭 길게 누를 때 빨리감기 배속
+const HOLD_MS = 250;    // 길게 누름으로 인정하는 시간
+const DEFAULTS = { level: 5, skim: 3.5, fontVh: 7, widthPct: 86, guidePct: 33, lineHeight: 1.45, gain: 2, fade: true, breakAll: false, autoHold: true, hudPin: false, mirror: false, clicker: 'flow' };
 
 /* ---------- 저장 ---------- */
 const load = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v && typeof v === 'object' ? v : fb; } catch (_) { return fb; } };
@@ -20,9 +22,10 @@ const holdOf = c => holds[c.id] ?? !!c.hold;
 
 /* ---------- DOM ---------- */
 const stage = $('stage'), mirror = $('mirror'), roll = $('roll');
-const state = { y: 0, vel: 0, running: false, hold: null, tween: null, startY: 0, lastT: 0, elapsed: 0, endY: 1, blank: false, consumed: new Set(), idleTimer: 0, toastTimer: 0 };
-let blocks = [];   // { el, kind, item?, cue?, index? }
-let lineEls = [];  // 화자 대사 블록 순서대로
+const state = { y: 0, vel: 0, running: false, ff: false, hold: null, tween: null, startY: 0, lastT: 0, elapsed: 0, endY: 1, blank: false, consumed: new Set(), idleTimer: 0, toastTimer: 0 };
+let blocks = [];   // { el, kind, top, h, item?, cue?, index? }
+let lineEls = [];  // 화자 대사 블록
+let lineTops = []; // 대사 블록의 문서상 위치 (캐시)
 
 /* ---------- 렌더 ---------- */
 function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
@@ -52,23 +55,32 @@ function render() {
 function guidePx() { return innerHeight * settings.guidePct / 100; }
 function lineHeightPx() { return innerHeight * settings.fontVh / 100 * settings.lineHeight; }
 function layout() {
-  const endBlk = blocks[blocks.length - 1];
-  state.endY = Math.max(1, endBlk.el.offsetTop - guidePx());
-  // 진행 바 마커
+  for (const b of blocks) { b.top = b.el.offsetTop; b.h = b.el.offsetHeight; }
+  lineTops = lineEls.map(n => n.offsetTop);
+  state.endY = Math.max(1, blocks[blocks.length - 1].top - guidePx());
   const m = $('progress').querySelector('.markers'); m.replaceChildren();
   for (const b of blocks) {
-    if (b.kind === 'sec' && b.text.startsWith('#')) { const s = el('span'); s.style.left = (b.el.offsetTop - guidePx()) / state.endY * 100 + '%'; s.dataset.label = b.text; m.append(s); }
-    else if (b.kind === 'cue' && holdOf(b.cue)) { const s = el('span', 'hold'); s.style.left = (b.el.offsetTop - guidePx()) / state.endY * 100 + '%'; s.dataset.label = 'HOLD'; m.append(s); }
+    const at = (b.top - guidePx()) / state.endY * 100 + '%';
+    if (b.kind === 'sec' && b.text.startsWith('#')) { const n = el('span'); n.style.left = at; n.dataset.label = b.text; m.append(n); }
+    else if (b.kind === 'cue' && holdOf(b.cue)) { const n = el('span', 'hold'); n.style.left = at; n.dataset.label = 'HOLD'; m.append(n); }
   }
   setY(state.y); paintHud();
 }
+/* 읽기선에 걸린 블록을 이분 탐색 */
+function blockAt(docY) {
+  let lo = 0, hi = blocks.length - 1, res = blocks[0];
+  while (lo <= hi) { const mid = (lo + hi) >> 1; if (blocks[mid].top <= docY) { res = blocks[mid]; lo = mid + 1; } else hi = mid - 1; }
+  return res;
+}
+/* 대사가 아닌 구간(식순 제목·지시문)은 빨리 지나감 */
+function skimMul() { const b = blockAt(state.y + guidePx() + 1); return b && b.kind === 'line' ? 1 : settings.skim; }
 /* 읽기선에 걸린 위치를 (블록, 비율)로 기억 → 글자·폭 변경 후 복원 */
 function anchor() {
   const docY = state.y + guidePx();
-  for (const b of blocks) { const t = b.el.offsetTop, h = b.el.offsetHeight; if (docY < t + h) return { b, f: Math.max(0, (docY - t) / Math.max(1, h)) }; }
+  for (const b of blocks) { if (docY < b.top + b.h) return { b, f: Math.max(0, (docY - b.top) / Math.max(1, b.h)) }; }
   return null;
 }
-function relayout(fn) { const a = anchor(); fn(); layout(); if (a) setY(a.b.el.offsetTop + a.f * a.b.el.offsetHeight - guidePx()); }
+function relayout(fn) { const a = anchor(); fn(); layout(); if (a) setY(a.b.top + a.f * a.b.h - guidePx()); }
 
 /* ---------- 설정 적용 ---------- */
 function applySettings() {
@@ -83,6 +95,7 @@ function applySettings() {
   $('in-width').value = settings.widthPct; $('width-out').textContent = settings.widthPct;
   $('in-lh').value = settings.lineHeight; $('lh-out').textContent = settings.lineHeight.toFixed(2);
   $('in-gain').value = settings.gain; $('gain-out').textContent = settings.gain.toFixed(1);
+  $('in-skim').value = settings.skim; $('skim-out').textContent = settings.skim.toFixed(1);
   $('in-fade').checked = settings.fade; $('in-break').checked = !!settings.breakAll; $('in-hold').checked = settings.autoHold; $('in-hud').checked = settings.hudPin; $('in-clicker').value = settings.clicker;
   save(LS.settings, settings);
 }
@@ -98,11 +111,12 @@ function frame(t) {
     setY(tw.from + (tw.to - tw.from) * e);
     if (p >= 1) { state.tween = null; if (tw.then) tw.then(); }
   } else {
-    const target = state.running ? speedPx() : 0;
-    state.vel += (target - state.vel) * Math.min(1, dt / 0.22);   // 가감속
-    if (Math.abs(state.vel) > 0.01 || state.running) {
-      const prev = state.y; const next = prev + state.vel * dt;
-      if (state.running) {
+    const target = state.ff ? speedPx() * FF_MULT : state.running ? speedPx() * skimMul() : 0;
+    state.vel += (target - state.vel) * Math.min(1, dt / (state.ff ? 0.12 : 0.22));   // 가감속
+    if (Math.abs(state.vel) > 0.01 || state.running || state.ff) {
+      const prev = state.y, next = prev + state.vel * dt;
+      if (state.ff) { consumePassed(prev, next); setY(next); if (state.y >= state.endY) endFF(); }
+      else if (state.running) {
         state.elapsed += dt;
         const h = settings.autoHold && holdAhead(prev, next);
         if (h) { setY(h.thr); stop('hold', h); }
@@ -117,12 +131,14 @@ function frame(t) {
 function holdAhead(prev, next) {
   for (const b of blocks) {
     if (b.kind !== 'cue' || !holdOf(b.cue) || state.consumed.has(b.cue.id)) continue;
-    const thr = b.el.offsetTop - guidePx();
-    if (prev < thr && next >= thr) return { thr, cue: b.cue, el: b.el };
+    const thr = b.top - guidePx();
+    if (prev < thr && next >= thr) return { thr, cue: b.cue };
   }
   return null;
 }
-function releaseConsumed() { for (const b of blocks) if (b.kind === 'cue' && state.consumed.has(b.cue.id) && state.y < b.el.offsetTop - guidePx() - lineHeightPx()) state.consumed.delete(b.cue.id); }
+function releaseConsumed() { for (const b of blocks) if (b.kind === 'cue' && state.consumed.has(b.cue.id) && state.y < b.top - guidePx() - lineHeightPx()) state.consumed.delete(b.cue.id); }
+/* 빨리감기로 지나친 HOLD 큐는 손을 떼자마자 다시 잡지 않도록 소비 처리 */
+function consumePassed(prev, next) { for (const b of blocks) if (b.kind === 'cue' && holdOf(b.cue)) { const thr = b.top - guidePx(); if (prev < thr && next >= thr) state.consumed.add(b.cue.id); } }
 function run() {
   if (state.running) return;
   if (state.y >= state.endY - 1) { toast('대본 끝. Home으로 처음으로'); return; }
@@ -137,18 +153,21 @@ function stop(reason, h) {
   paintState();
 }
 function toggle() { state.running ? stop('user') : run(); }
+function startFF() { if (state.ff) return; state.ff = true; state.tween = null; if (state.hold) { state.consumed.add(state.hold.cue.id); state.hold = null; $('hold-badge').hidden = true; } paintState(); }
+function endFF() { if (!state.ff) return; state.ff = false; releaseConsumed(); paintState(); }
 function tweenTo(to, dur, then) { const was = state.running; state.running = false; state.vel = 0; state.tween = { from: state.y, to: Math.min(state.endY, Math.max(0, to)), t0: performance.now(), dur, then: () => { releaseConsumed(); if (was) run(); then && then(); } }; paintState(); }
 function nudge(dir) { tweenTo(state.y + dir * lineHeightPx(), 220); }
-function jumpToBlock(b) { if (state.hold) { state.hold = null; $('hold-badge').hidden = true; } state.running = false; state.vel = 0; state.tween = { from: state.y, to: Math.min(state.endY, Math.max(0, b.el.offsetTop - guidePx())), t0: performance.now(), dur: 420, then: () => { releaseConsumed(); paintState(); } }; paintState(); }
-function currentLineIdx() { const docY = state.y + guidePx() + 2; let idx = -1; lineEls.forEach((n, i) => { if (n.offsetTop <= docY) idx = i; }); return idx; }
+/* 대사 이동은 재생 상태를 유지함 (진행 중이면 이동 후 계속 흐름) */
+function goToTop(top, dur = 420) { if (state.hold) { state.consumed.add(state.hold.cue.id); state.hold = null; $('hold-badge').hidden = true; } tweenTo(top - guidePx(), dur); }
+function currentLineIdx() { const docY = state.y + guidePx() + 2; let idx = -1; for (let i = 0; i < lineTops.length; i++) if (lineTops[i] <= docY) idx = i; return idx; }
 function prevNextLine(dir) {
   const docY = state.y + guidePx();
-  let target = null;
-  if (dir > 0) target = lineEls.find(n => n.offsetTop > docY + 2);
-  else { for (let i = lineEls.length - 1; i >= 0; i--) if (lineEls[i].offsetTop < docY - 2) { target = lineEls[i]; break; } }
-  if (target) jumpToBlock({ el: target });
+  let top = null;
+  if (dir > 0) top = lineTops.find(t => t > docY + 2);
+  else for (let i = lineTops.length - 1; i >= 0; i--) if (lineTops[i] < docY - 2) { top = lineTops[i]; break; }
+  if (top != null) goToTop(top);
 }
-function goSection(i) { const sec = SRC.sections[i]; const b = sec && blocks.find(x => x.kind === 'sec' && x.text === sec.text); if (b) { jumpToBlock(b); toast(b.text); } }
+function goSection(i) { const sec = SRC.sections[i]; const b = sec && blocks.find(x => x.kind === 'sec' && x.text === sec.text); if (b) { goToTop(b.top); toast(b.text); } }
 function home() { state.consumed.clear(); if (state.hold) { state.hold = null; $('hold-badge').hidden = true; } state.running = false; state.elapsed = 0; tweenTo(0, 500); toast('대본 처음'); }
 
 /* ---------- 카운트다운·블랭크·전체화면·미러 ---------- */
@@ -168,8 +187,9 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 /* ---------- HUD·컨트롤 표시 ---------- */
 const fmt = s => { s = Math.max(0, Math.round(s)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
 function paintState() {
-  const st = $('hud-state'); st.className = 'state ' + (state.hold ? 'hold' : state.running ? 'running' : 'stopped');
-  st.querySelector('b').textContent = state.hold ? 'HOLD' : state.running ? 'RUN' : 'STOP';
+  const st = $('hud-state'); st.className = 'state ' + (state.ff ? 'ff' : state.hold ? 'hold' : state.running ? 'running' : 'stopped');
+  st.querySelector('b').textContent = state.ff ? 'FF' : state.hold ? 'HOLD' : state.running ? 'RUN' : 'STOP';
+  $('btn-ff').classList.toggle('active', state.ff);
   const b = $('btn-toggle'); b.textContent = state.running ? '❚❚ 정지' : state.hold ? '▶ 재개' : state.y > 0 ? '▶ 재개' : '▶ 시작';
   b.classList.toggle('on', state.running); stage.classList.toggle('running', state.running);
   $('endcap').hidden = state.y < state.endY - 1;
@@ -186,7 +206,7 @@ function paintHud() {
 }
 function wake() { stage.classList.remove('idle'); clearTimeout(state.idleTimer); state.idleTimer = setTimeout(() => stage.classList.add('idle'), 3000); }
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(state.toastTimer); state.toastTimer = setTimeout(() => t.hidden = true, 1800); }
-function panel(id, open) { const p = $(id); const other = id === 'settings' ? 'help' : 'settings'; $(other).hidden = true; p.hidden = open ?? !p.hidden; }
+function panel(id, open) { const p = $(id); const other = id === 'settings' ? 'help' : 'settings'; $(other).hidden = true; p.hidden = open === undefined ? !p.hidden : !open; }
 
 /* ---------- 입력 ---------- */
 stage.addEventListener('pointermove', wake);
@@ -197,6 +217,10 @@ $('btn-prev').onclick = () => prevNextLine(-1); $('btn-next').onclick = () => pr
 $('btn-back').onclick = () => { tweenTo(state.startY, 400); toast('재생 시작점'); };
 $('btn-font-minus').onclick = () => setSetting('fontVh', Math.max(3, +(settings.fontVh - 0.5).toFixed(1)), true);
 $('btn-font-plus').onclick = () => setSetting('fontVh', Math.min(24, +(settings.fontVh + 0.5).toFixed(1)), true);
+(() => { const b = $('btn-ff');
+  b.addEventListener('pointerdown', e => { e.preventDefault(); startFF(); try { b.setPointerCapture(e.pointerId); } catch (_) {} });
+  for (const t of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(t, endFF);
+})();
 $('btn-countdown').onclick = countdown; $('btn-blank').onclick = () => blank(); $('btn-mirror').onclick = () => setSetting('mirror', !settings.mirror);
 $('btn-full').onclick = fullscreen; $('btn-settings').onclick = () => panel('settings'); $('btn-help').onclick = () => panel('help'); $('btn-edit').onclick = enterEdit;
 $('btn-home').onclick = home; $('btn-reset-settings').onclick = () => relayout(() => { settings = { ...DEFAULTS }; applySettings(); });
@@ -204,6 +228,7 @@ $('in-guide').oninput = e => setSetting('guidePct', +e.target.value, true);
 $('in-width').oninput = e => setSetting('widthPct', +e.target.value, true);
 $('in-lh').oninput = e => setSetting('lineHeight', +e.target.value, true);
 $('in-gain').oninput = e => setSetting('gain', +e.target.value);
+$('in-skim').oninput = e => setSetting('skim', +e.target.value);
 $('in-fade').onchange = e => setSetting('fade', e.target.checked);
 $('in-break').onchange = e => setSetting('breakAll', e.target.checked, true);
 $('in-hold').onchange = e => setSetting('autoHold', e.target.checked);
@@ -214,13 +239,26 @@ $('sel-section').onchange = e => { if (e.target.value !== '') goSection(+e.targe
 $('progress').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); tweenTo((e.clientX - r.left) / r.width * state.endY, 400); });
 function setLevel(d) { setSetting('level', Math.min(SPEED_VH.length, Math.max(1, settings.level + d))); toast('속도 ' + settings.level); }
 
-// 무대 클릭: 진행 중 → 정지, 정지 중 대사 클릭 → 그 대사부터, 빈 곳 클릭 → 시작
-mirror.addEventListener('click', e => {
+// 무대: 짧게 누르면 정지·이동, 길게 누르고 있으면 빨리감기
+let press = null;
+mirror.addEventListener('pointerdown', e => {
+  if (e.button !== 0) return;
+  wake();
   if (!$('settings').hidden || !$('help').hidden) { $('settings').hidden = $('help').hidden = true; return; }
-  const line = e.target.closest('.line');
-  if (state.running) return stop('user');
-  if (line) { jumpToBlock({ el: line }); toast('여기부터'); } else toggle();
+  press = { line: e.target.closest('.line'), ff: false };
+  press.timer = setTimeout(() => { if (press) { press.ff = true; startFF(); } }, HOLD_MS);
+  try { mirror.setPointerCapture(e.pointerId); } catch (_) {}
 });
+function endPress() {
+  if (!press) return;
+  clearTimeout(press.timer);
+  const p = press; press = null;
+  if (p.ff) return endFF();
+  if (state.running) return stop('user');
+  if (p.line) { goToTop(lineTops[+p.line.dataset.index]); toast('여기부터'); } else toggle();
+}
+mirror.addEventListener('pointerup', endPress);
+mirror.addEventListener('pointercancel', endPress);
 // 휠 = 넛지 (게인 적용). 진행 중에도 위치만 보정
 mirror.addEventListener('wheel', e => { e.preventDefault(); wake(); state.tween = null; setY(state.y + e.deltaY * settings.gain * 0.5); releaseConsumed(); paintHud(); }, { passive: false });
 stage.addEventListener('contextmenu', e => e.preventDefault());
@@ -246,12 +284,15 @@ window.addEventListener('keydown', e => {
   const lower = k.length === 1 ? k.toLowerCase() : k;
   const letters = { c: countdown, b: () => blank(), f: fullscreen, m: () => setSetting('mirror', !settings.mirror), h: () => { setSetting('hudPin', !settings.hudPin); toast(settings.hudPin ? 'HUD 고정' : 'HUD 자동 숨김'); }, e: enterEdit };
   let fn = act[k] || letters[lower];
+  if (k === ']') { e.preventDefault(); startFF(); return; }
   if (!fn && /^[1-9]$/.test(k) && +k <= SRC.sections.length) fn = () => goSection(+k - 1);
   if (!fn) return;
   e.preventDefault(); if (e.repeat && !['ArrowUp', 'ArrowDown', 'PageUp'].includes(k)) return;
   wake(); fn();
 }, true);
 
+window.addEventListener('keyup', e => { if (e.key === ']') endFF(); });
+window.addEventListener('blur', () => { endFF(); if (press) { clearTimeout(press.timer); press = null; } });
 window.addEventListener('resize', () => relayout(() => {}));
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 

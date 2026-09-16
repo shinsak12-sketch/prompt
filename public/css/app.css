@@ -19,7 +19,6 @@ kbd{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.1);bord
 
 /* ===== 무대 ===== */
 #stage{position:fixed;inset:0;background:var(--bg);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;cursor:default}
-#stage.idle{cursor:none}
 #mirror{position:absolute;inset:0;overflow:hidden}
 #mirror.flip{transform:scaleX(-1)}
 #roll{position:absolute;left:50%;top:0;width:var(--width);transform:translate3d(-50%,0,0);will-change:transform;padding-top:var(--guide);padding-bottom:100vh;font-size:var(--font);line-height:var(--lh);font-weight:700;letter-spacing:-.012em;word-break:keep-all;overflow-wrap:anywhere}
@@ -60,6 +59,8 @@ kbd{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.1);bord
 #hud .state i{width:8px;height:8px;border-radius:50%;background:#7CE39C;box-shadow:0 0 8px #7CE39C}
 #hud .state.stopped i{background:#8B94A3;box-shadow:none}
 #hud .state.hold i{background:var(--cue);box-shadow:0 0 8px var(--cue);animation:pulse 1s infinite}
+#hud .state.ff i{background:#7FD8FF;box-shadow:0 0 8px #7FD8FF}
+#hud .state.ff b{color:#7FD8FF}
 #hud .state.running b{color:#7CE39C}
 #hud .state.hold b{color:var(--cue)}
 #hud-remain{color:var(--ui-muted)}
@@ -73,7 +74,6 @@ kbd{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.1);bord
 #toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:9px;padding:8px 14px;z-index:7;backdrop-filter:blur(8px);animation:drop .3s var(--ease)}
 
 #controls{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:0 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.85) 55%);transition:opacity .35s,transform .35s var(--ease)}
-#stage.idle #controls{opacity:0;transform:translateY(10px);pointer-events:none}
 #progress{position:relative;height:16px;cursor:pointer;margin:0 2px 8px}
 #progress::before{content:"";position:absolute;left:0;right:0;top:6px;height:4px;border-radius:2px;background:rgba(255,255,255,.13)}
 #progress .fill{position:absolute;left:0;top:6px;height:4px;border-radius:2px;background:var(--cue);width:0;box-shadow:0 0 10px rgba(240,178,82,.6)}
