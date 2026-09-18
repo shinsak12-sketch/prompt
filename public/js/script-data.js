@@ -2,14 +2,15 @@
 window.PROMPTER_SCRIPT = {
  "title": "창립 42주년 기념식 사회자 프롬프터",
  "version": 3,
- "sourceName": "2026_창립42주년_기념식_사회자_시나리오(최종본).docx + 대표이사 기념사",
- "sourceHash": "fe266d6652e9f1f3",
+ "sourceName": "2026_창립42주년_기념식_사회자_시나리오(최종본).docx + 대표이사 기념사 + 근속상 수상 소감",
+ "sourceHash": "15d231edc106ee26",
  "speakers": {
   "김우중": "a",
   "최윤정": "b",
   "동시": "both",
   "대표님": "ceo",
-  "상장 낭독": "award"
+  "상장 낭독": "award",
+  "근속상 이사님": "senior"
  },
  "sections": [
   {
@@ -29,11 +30,11 @@ window.PROMPTER_SCRIPT = {
    "text": "#4 수상자 소감"
   },
   {
-   "index": 76,
+   "index": 83,
    "text": "#5 일로만난42"
   },
   {
-   "index": 90,
+   "index": 97,
    "text": "#7 폐회"
   }
  ],
@@ -689,7 +690,8 @@ window.PROMPTER_SCRIPT = {
    "id": "l069"
   },
   {
-   "speaker": "최윤정",
+   "id": "k00",
+   "speaker": "근속상 이사님",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [
@@ -700,6 +702,61 @@ window.PROMPTER_SCRIPT = {
      "id": "c070-0"
     }
    ],
+   "text": "먼저 30년 근속이라는 뜻깊은 상을 받게 되어 진심으로 감사드립니다."
+  },
+  {
+   "id": "k01",
+   "speaker": "근속상 이사님",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "지난 30년 동안 회사와 함께 성장하며 많은 선후배, 동료들과 소중한 경험을 쌓을 수 있었던 것 또한 큰 감사로 남습니다."
+  },
+  {
+   "id": "k02",
+   "speaker": "근속상 이사님",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "앞으로 우리 회사가 대한민국 자동차보험의 중심에서 더욱 경쟁력을 높여가기 위해서는 현장의 전문성과 구성원 한 사람 한 사람의 역할이 무엇보다 중요하다고 생각합니다."
+  },
+  {
+   "id": "k03",
+   "speaker": "근속상 이사님",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "저 역시 회사가 나아가고자 하는 방향에 뜻을 같이하며, 고객에게 신뢰받는 보상서비스와 현장 경쟁력 강화를 위해 제 자리에서 최선을 다하겠습니다."
+  },
+  {
+   "id": "k04",
+   "speaker": "근속상 이사님",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "또한 회사의 모든 구성원이 주인공이라는 마음으로 각자의 역할에 자부심을 갖고 일할 수 있도록 함께 고민하고 지원하겠습니다."
+  },
+  {
+   "id": "k05",
+   "speaker": "근속상 이사님",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "다시 한번 뜻깊은 상을 주신 회사와 지난 30년을 함께해주신 모든 임직원 여러분께 진심으로 감사드립니다."
+  },
+  {
+   "id": "k06",
+   "speaker": "근속상 이사님",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "감사합니다."
+  },
+  {
+   "speaker": "최윤정",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
    "text": "수상자분들 소감 정말 잘 들었습니다. 특히 유종수 수석님은 ‘고의사고 보상의 달인’으로 선정되신 분 맞으시죠?",
    "id": "l070"
   },
