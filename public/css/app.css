@@ -1,7 +1,7 @@
 /* ===== 토큰 ===== */
 :root{
   --bg:#000; --fg:#F4F6F8; --fg-dim:rgba(244,246,248,.5);
-  --a:#8BD1FF; --b:#FFAFD3; --both:#FFFFFF; --ceo:#D6F3E2; --senior:#F7E6CE; --staff:#E3DCF8; --award:#F5D578; --cue:#F0B252;
+  --a:#8BD1FF; --b:#FFAFD3; --both:#FFFFFF; --ceo:#D6F3E2; --senior:#F7E6CE; --staff:#E3DCF8; --master:#D4EDF7; --award:#F5D578; --cue:#F0B252;
   --ui-bg:rgba(16,18,22,.86); --ui-line:rgba(255,255,255,.12); --ui-fg:#E6E9EE; --ui-muted:#9AA3B0;
   --font:7vh; --lh:1.45; --width:86%; --guide:33vh; --name-w:8vw; --name-size:clamp(2vh, 1.2vh + var(--font) * 0.2, var(--name-w) / 3.4);
   --sans:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Noto Sans CJK KR",sans-serif;
@@ -31,6 +31,7 @@ kbd{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.1);bord
 .line.ceo{color:var(--ceo)}
 .line.senior{color:var(--senior)}
 .line.staff{color:var(--staff)}
+.line.master{color:var(--master)}
 .line.award{color:var(--award)}
 .line .bar{display:none}
 .line .who{font-size:var(--name-size);line-height:1.3;font-weight:800;letter-spacing:.01em;color:inherit;padding-top:calc((var(--font) * var(--lh) - var(--name-size) * 1.3) / 2);text-align:right;padding-right:.5em;border-right:3px solid currentColor;opacity:.92;word-break:keep-all;overflow-wrap:normal}
@@ -153,7 +154,7 @@ kbd{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.1);bord
 .ed-item{display:grid;grid-template-columns:110px 1fr;gap:12px;background:#181c24;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 6px 16px -10px rgba(0,0,0,.8)}
 .ed-item .who{font-weight:700;font-size:14px;padding-top:8px}
 .ed-item .who small{display:block;font-family:var(--mono);font-size:11px;color:#6B7482;font-weight:400;margin-top:4px}
-.ed-item.a .who{color:var(--a)}.ed-item.b .who{color:var(--b)}.ed-item.both .who{color:var(--both)}.ed-item.ceo .who{color:var(--ceo)}.ed-item.senior .who{color:var(--senior)}.ed-item.staff .who{color:var(--staff)}.ed-item.award .who{color:var(--award)}
+.ed-item.a .who{color:var(--a)}.ed-item.b .who{color:var(--b)}.ed-item.both .who{color:var(--both)}.ed-item.ceo .who{color:var(--ceo)}.ed-item.senior .who{color:var(--senior)}.ed-item.staff .who{color:var(--staff)}.ed-item.master .who{color:var(--master)}.ed-item.award .who{color:var(--award)}
 .ed-item textarea{width:100%;min-height:44px;resize:vertical;background:#0f1216;color:#F4F6F8;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 11px;font:inherit;font-size:16px;line-height:1.55;box-shadow:inset 0 2px 5px rgba(0,0,0,.6)}
 .ed-item textarea:focus{outline:2px solid rgba(240,178,82,.6);outline-offset:1px}
 .ed-item.changed textarea{border-color:rgba(240,178,82,.5)}

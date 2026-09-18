@@ -3,7 +3,7 @@ window.PROMPTER_SCRIPT = {
  "title": "창립 42주년 기념식 사회자 프롬프터",
  "version": 3,
  "sourceName": "2026_창립42주년_기념식_사회자_시나리오(최종본).docx + 대표이사 기념사 + 근속상 수상 소감",
- "sourceHash": "2321a9ea5c64ff98",
+ "sourceHash": "db64a396c54bdf5a",
  "speakers": {
   "김우중": "a",
   "최윤정": "b",
@@ -11,7 +11,8 @@ window.PROMPTER_SCRIPT = {
   "대표님": "ceo",
   "상장 낭독": "award",
   "김형인 본부장": "senior",
-  "김예지": "staff"
+  "김예지": "staff",
+  "유종수 수석": "master"
  },
  "sections": [
   {
@@ -31,11 +32,11 @@ window.PROMPTER_SCRIPT = {
    "text": "#4 수상자 소감"
   },
   {
-   "index": 89,
+   "index": 99,
    "text": "#5 일로만난42"
   },
   {
-   "index": 103,
+   "index": 113,
    "text": "#7 폐회"
   }
  ],
@@ -744,6 +745,86 @@ window.PROMPTER_SCRIPT = {
    "section": "#4 수상자 소감",
    "before": [],
    "text": "앞으로 지금보다 더 큰 책임감을 가지고 맡은 업무에 최선을 다해서 주변에 긍정적인 영향을 줄 수 있는 사람이 될 수 있도록 꾸준히 노력하겠습니다. 감사합니다."
+  },
+  {
+   "id": "u00",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "안녕하십니까. 인천차량보상부 부천차량센터 유종수 수석입니다."
+  },
+  {
+   "id": "u01",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "창립 42주년을 맞아 이렇게 명예롭고 뜻깊은 공로상을 받게 되어 진심으로 영광스럽게 생각합니다."
+  },
+  {
+   "id": "u02",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "올해 상반기 ‘보상의 달인’에 이어 오늘 공로상까지 수상하게 된 것은, 결코 제가 잘해서 받았다고 생각하지 않습니다."
+  },
+  {
+   "id": "u03",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "저의 단점보다 장점을 먼저 봐주시고, 부족한 부분까지 예쁘게 포장해 주시는 선후배분들이 계셨기에 받을 수 있었던 상이라고 생각합니다."
+  },
+  {
+   "id": "u04",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "앞으로도 보상의 달인으로서, 그리고 공로상 수상자로서 제가 필요한 분이 있다면 언제든 편하게 연락 주십시오."
+  },
+  {
+   "id": "u05",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "제가 받은 도움만큼, 저도 기꺼이 도움을 드리겠습니다."
+  },
+  {
+   "id": "u06",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "인천이라는 어려운 근무환경 속에서 직원들의 버팀목이 되어주시는 인천보상부 권용환 부장님을 비롯한 인천차량부 모든 선후배분들께 진심으로 감사드립니다."
+  },
+  {
+   "id": "u07",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "지나간 인연은 소중히 간직하고, 앞으로 마주할 인연 또한 소중히 만들어가겠습니다."
+  },
+  {
+   "id": "u08",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "더 겸손하게 일하고, 더 겸양하는 자세로 보답하겠습니다."
+  },
+  {
+   "id": "u09",
+   "speaker": "유종수 수석",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "감사합니다."
   },
   {
    "id": "k10",
