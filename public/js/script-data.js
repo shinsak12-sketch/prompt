@@ -3,14 +3,15 @@ window.PROMPTER_SCRIPT = {
  "title": "창립 42주년 기념식 사회자 프롬프터",
  "version": 3,
  "sourceName": "2026_창립42주년_기념식_사회자_시나리오(최종본).docx + 대표이사 기념사 + 근속상 수상 소감",
- "sourceHash": "bbc048f1ad2befc5",
+ "sourceHash": "2321a9ea5c64ff98",
  "speakers": {
   "김우중": "a",
   "최윤정": "b",
   "동시": "both",
   "대표님": "ceo",
   "상장 낭독": "award",
-  "김형인 본부장": "senior"
+  "김형인 본부장": "senior",
+  "김예지": "staff"
  },
  "sections": [
   {
@@ -30,11 +31,11 @@ window.PROMPTER_SCRIPT = {
    "text": "#4 수상자 소감"
   },
   {
-   "index": 83,
+   "index": 89,
    "text": "#5 일로만난42"
   },
   {
-   "index": 97,
+   "index": 103,
    "text": "#7 폐회"
   }
  ],
@@ -690,8 +691,8 @@ window.PROMPTER_SCRIPT = {
    "id": "l069"
   },
   {
-   "id": "k10",
-   "speaker": "김형인 본부장",
+   "id": "y00",
+   "speaker": "김예지",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [
@@ -702,6 +703,54 @@ window.PROMPTER_SCRIPT = {
      "id": "c070-0"
     }
    ],
+   "text": "안녕하세요. 지방스마트 차량부 충청보상센터 김예지입니다."
+  },
+  {
+   "id": "y01",
+   "speaker": "김예지",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "먼저 이렇게 뜻깊은 상을 주셔서 정말 감사드립니다."
+  },
+  {
+   "id": "y02",
+   "speaker": "김예지",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "회사 생활을 하다 보면 잘하고 있는지 고민될 때도 있고 힘들 때도 있는데 이번 상을 받으면서 제가 그동안 해온 것들을 한 번 돌아보게 된 것 같습니다."
+  },
+  {
+   "id": "y03",
+   "speaker": "김예지",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "아직 부족한 부분도 많고 배워야할 것도 많지만 함께 일하는 선배님 후배님들이 많이 알려주시고 도와주신 덕분에 좋은 모습으로 성장하고 업무를 해나갈 수 있었습니다."
+  },
+  {
+   "id": "y04",
+   "speaker": "김예지",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "이번 상은 앞으로도 지금처럼 성실하게 잘해나가라는 의미로 주신 상이라고 생각합니다."
+  },
+  {
+   "id": "y05",
+   "speaker": "김예지",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
+   "text": "앞으로 지금보다 더 큰 책임감을 가지고 맡은 업무에 최선을 다해서 주변에 긍정적인 영향을 줄 수 있는 사람이 될 수 있도록 꾸준히 노력하겠습니다. 감사합니다."
+  },
+  {
+   "id": "k10",
+   "speaker": "김형인 본부장",
+   "kind": "dialogue",
+   "section": "#4 수상자 소감",
+   "before": [],
    "text": "안녕하십니까! 수도권보상본부장 김형인 입니다."
   },
   {
