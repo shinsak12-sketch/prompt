@@ -8,7 +8,7 @@ const LS = { settings: 'prompter42:settings', edits: V + ':edits', holds: V + ':
 const SPEED_VH = [1.0, 1.3, 1.6, 1.9, 2.2, 2.6, 3.0, 3.5, 4.0, 4.6, 5.3, 6.1, 7.0, 8.0, 9.2, 10.6, 12.2, 14.0, 16.1, 18.5]; // 단계 1~20, 단위 vh/s
 const FF_MULT = 8;      // 클릭 길게 누를 때 빨리감기 배속
 const HOLD_MS = 250;    // 길게 누름으로 인정하는 시간
-const DEFAULTS = { level: 5, skim: 3.5, fontVh: 7, widthPct: 86, guidePct: 33, lineHeight: 1.45, gain: 2, fade: true, breakAll: false, autoHold: true, hudPin: false, mirror: false, clicker: 'flow' };
+const DEFAULTS = { mode: 'shoot', level: 5, skim: 3.5, fontVh: 7, widthPct: 86, guidePct: 33, lineHeight: 1.45, gain: 2, fade: true, breakAll: false, hudPin: false, mirror: false, clicker: 'flow' };
 
 /* ---------- 저장 ---------- */
 const load = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v && typeof v === 'object' ? v : fb; } catch (_) { return fb; } };
@@ -34,7 +34,7 @@ function render() {
   const push = (node, meta) => { node.classList.add('blk'); frag.append(node); blocks.push({ el: node, ...meta }); };
   const cueNode = c => {
     const n = el('div', 'cue' + (holdOf(c) ? ' hold' : ''));
-    if (holdOf(c)) n.append(el('span', 'badge', 'HOLD'));
+    if (holdOf(c)) n.append(el('span', 'badge'));
     n.append(document.createTextNode(c.text)); n.dataset.cue = c.id; return n;
   };
   SRC.items.forEach((it, index) => {
@@ -87,6 +87,9 @@ function applySettings() {
   const r = document.documentElement.style;
   r.setProperty('--font', settings.fontVh + 'vh'); r.setProperty('--width', settings.widthPct + '%');
   r.setProperty('--guide', settings.guidePct + 'vh'); r.setProperty('--lh', settings.lineHeight);
+  stage.classList.toggle('shoot', settings.mode !== 'live');
+  $('btn-mode').textContent = settings.mode === 'live' ? '🔴 본식' : '🎬 촬영';
+  $('btn-mode').classList.toggle('active', settings.mode === 'live');
   stage.classList.toggle('nofade', !settings.fade); stage.classList.toggle('breakall', !!settings.breakAll); stage.classList.toggle('hud-pin', settings.hudPin);
   mirror.classList.toggle('flip', settings.mirror); $('btn-mirror').classList.toggle('active', settings.mirror);
   $('speed-out').textContent = settings.level; $('hud-speed').querySelector('b').textContent = settings.level;
@@ -96,7 +99,7 @@ function applySettings() {
   $('in-lh').value = settings.lineHeight; $('lh-out').textContent = settings.lineHeight.toFixed(2);
   $('in-gain').value = settings.gain; $('gain-out').textContent = settings.gain.toFixed(1);
   $('in-skim').value = settings.skim; $('skim-out').textContent = settings.skim.toFixed(1);
-  $('in-fade').checked = settings.fade; $('in-break').checked = !!settings.breakAll; $('in-hold').checked = settings.autoHold; $('in-hud').checked = settings.hudPin; $('in-clicker').value = settings.clicker;
+  $('in-fade').checked = settings.fade; $('in-break').checked = !!settings.breakAll; $('in-hud').checked = settings.hudPin; $('in-clicker').value = settings.clicker;
   save(LS.settings, settings);
 }
 function setSetting(key, val, reflow) { if (reflow) relayout(() => { settings[key] = val; applySettings(); }); else { settings[key] = val; applySettings(); } }
@@ -118,7 +121,7 @@ function frame(t) {
       if (state.ff) { consumePassed(prev, next); setY(next); if (state.y >= state.endY) endFF(); }
       else if (state.running) {
         state.elapsed += dt;
-        const h = settings.autoHold && holdAhead(prev, next);
+        const h = settings.mode === 'live' && holdAhead(prev, next);
         if (h) { setY(h.thr); stop('hold', h); }
         else if (next >= state.endY) { setY(state.endY); stop('end'); }
         else setY(next);
@@ -221,6 +224,7 @@ $('btn-font-plus').onclick = () => setSetting('fontVh', Math.min(24, +(settings.
   b.addEventListener('pointerdown', e => { e.preventDefault(); startFF(); try { b.setPointerCapture(e.pointerId); } catch (_) {} });
   for (const t of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(t, endFF);
 })();
+$('btn-mode').onclick = toggleMode;
 $('btn-countdown').onclick = countdown; $('btn-blank').onclick = () => blank(); $('btn-mirror').onclick = () => setSetting('mirror', !settings.mirror);
 $('btn-full').onclick = fullscreen; $('btn-settings').onclick = () => panel('settings'); $('btn-help').onclick = () => panel('help'); $('btn-edit').onclick = enterEdit;
 $('btn-home').onclick = home; $('btn-reset-settings').onclick = () => relayout(() => { settings = { ...DEFAULTS }; applySettings(); });
@@ -231,12 +235,17 @@ $('in-gain').oninput = e => setSetting('gain', +e.target.value);
 $('in-skim').oninput = e => setSetting('skim', +e.target.value);
 $('in-fade').onchange = e => setSetting('fade', e.target.checked);
 $('in-break').onchange = e => setSetting('breakAll', e.target.checked, true);
-$('in-hold').onchange = e => setSetting('autoHold', e.target.checked);
 $('in-hud').onchange = e => setSetting('hudPin', e.target.checked);
 $('in-clicker').onchange = e => setSetting('clicker', e.target.value);
 SRC.sections.forEach((s, i) => { const o = el('option', '', s.text); o.value = i; $('sel-section').append(o); });
 $('sel-section').onchange = e => { if (e.target.value !== '') goSection(+e.target.value); e.target.value = ''; e.target.blur(); };
 $('progress').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); tweenTo((e.clientX - r.left) / r.width * state.endY, 400); });
+function toggleMode() {
+  const live = settings.mode !== 'live';
+  if (!live && state.hold) { state.consumed.add(state.hold.cue.id); state.hold = null; $('hold-badge').hidden = true; paintState(); }
+  setSetting('mode', live ? 'live' : 'shoot');
+  toast(live ? '본식 모드 · 영상 큐에서 자동 정지' : '촬영 모드 · 영상 큐를 그냥 지나감');
+}
 function setLevel(d) { setSetting('level', Math.min(SPEED_VH.length, Math.max(1, settings.level + d))); toast('속도 ' + settings.level); }
 
 // 무대: 짧게 누르면 정지·이동, 길게 누르고 있으면 빨리감기
@@ -285,6 +294,7 @@ window.addEventListener('keydown', e => {
   const letters = { c: countdown, b: () => blank(), f: fullscreen, m: () => setSetting('mirror', !settings.mirror), h: () => { setSetting('hudPin', !settings.hudPin); toast(settings.hudPin ? 'HUD 고정' : 'HUD 자동 숨김'); }, e: enterEdit };
   let fn = act[k] || letters[lower];
   if (k === ']') { e.preventDefault(); startFF(); return; }
+  if (k === '0') { e.preventDefault(); if (!e.repeat) { wake(); toggleMode(); } return; }
   if (!fn && /^[1-9]$/.test(k) && +k <= SRC.sections.length) fn = () => goSection(+k - 1);
   if (!fn) return;
   e.preventDefault(); if (e.repeat && !['ArrowUp', 'ArrowDown', 'PageUp'].includes(k)) return;

@@ -27,12 +27,13 @@
     <span id="hud-time" title="경과 / 남은 시간"><b id="hud-elapsed">00:00</b> · <span id="hud-remain">−00:00</span></span>
   </div>
 
-  <div id="hold-badge" class="ui" hidden><span class="dot"></span>HOLD · 영상 송출 대기 · <kbd>Space</kbd> 재개</div>
+  <div id="hold-badge" class="ui" hidden><span class="dot"></span>영상 송출 대기 · <kbd>Space</kbd> 재개</div>
   <div id="toast" class="ui" hidden></div>
 
   <div id="controls" class="ui">
     <div id="progress" title="클릭하면 해당 위치로 이동"><div class="fill"></div><div class="markers"></div></div>
     <div class="bar">
+      <button id="btn-mode" title="촬영: 영상 큐에서 멈추지 않음 · 본식: 영상 큐에서 자동 정지">🎬 촬영</button>
       <button id="btn-toggle" class="pri" title="Space">▶ 시작</button>
       <div class="group" title="↑ ↓">
         <button id="btn-slower" aria-label="느리게">−</button>
@@ -71,7 +72,6 @@
     <div class="row"><label>지시문 구간 빨리 넘김 <output id="skim-out">3.5</output>배</label><input id="in-skim" type="range" min="1" max="8" step="0.5"></div>
     <div class="row toggle"><label for="in-fade">지나간 대사 페이드</label><input id="in-fade" type="checkbox"></div>
     <div class="row toggle"><label for="in-break">단어 중간 끊김 허용 (줄 끝까지 채움)</label><input id="in-break" type="checkbox"></div>
-    <div class="row toggle"><label for="in-hold">영상 큐 자동 정지(HOLD)</label><input id="in-hold" type="checkbox"></div>
     <div class="row toggle"><label for="in-hud">HUD 항상 표시</label><input id="in-hud" type="checkbox"></div>
     <div class="row"><label for="in-clicker">클리커 PageDown / PageUp</label>
       <select id="in-clicker"><option value="flow">흐름 모드 · 정지/재개 · 한 줄 되감기</option><option value="line">대사 모드 · 다음 대사 · 이전 대사</option></select></div>
@@ -85,6 +85,7 @@
       <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>속도 +1 / −1 (1~20)</td></tr>
       <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>이전 / 다음 대사로 (재생 중에도 멈추지 않음)</td></tr>
       <tr><td><kbd>Shift</kbd>+<kbd>↑↓</kbd> · 휠</td><td>한 줄 넛지</td></tr>
+      <tr><td><kbd>0</kbd></td><td>촬영 / 본식 모드 전환</td></tr>
       <tr><td>화면 길게 누름 · <kbd>]</kbd></td><td>누르고 있는 동안 빨리감기</td></tr>
       <tr><td><kbd>Backspace</kbd></td><td>마지막 재생 시작점으로</td></tr>
       <tr><td><kbd>1</kbd>…<kbd>6</kbd></td><td>식순 순서대로 이동</td></tr>
