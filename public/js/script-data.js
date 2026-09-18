@@ -3,14 +3,14 @@ window.PROMPTER_SCRIPT = {
  "title": "창립 42주년 기념식 사회자 프롬프터",
  "version": 3,
  "sourceName": "2026_창립42주년_기념식_사회자_시나리오(최종본).docx + 대표이사 기념사 + 근속상 수상 소감",
- "sourceHash": "780d29fd8d55096b",
+ "sourceHash": "bbc048f1ad2befc5",
  "speakers": {
   "김우중": "a",
   "최윤정": "b",
   "동시": "both",
   "대표님": "ceo",
   "상장 낭독": "award",
-  "근속상 이사님": "senior"
+  "김형인 본부장": "senior"
  },
  "sections": [
   {
@@ -691,7 +691,7 @@ window.PROMPTER_SCRIPT = {
   },
   {
    "id": "k10",
-   "speaker": "근속상 이사님",
+   "speaker": "김형인 본부장",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [
@@ -706,7 +706,7 @@ window.PROMPTER_SCRIPT = {
   },
   {
    "id": "k11",
-   "speaker": "근속상 이사님",
+   "speaker": "김형인 본부장",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [],
@@ -714,7 +714,7 @@ window.PROMPTER_SCRIPT = {
   },
   {
    "id": "k12",
-   "speaker": "근속상 이사님",
+   "speaker": "김형인 본부장",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [],
@@ -722,7 +722,7 @@ window.PROMPTER_SCRIPT = {
   },
   {
    "id": "k13",
-   "speaker": "근속상 이사님",
+   "speaker": "김형인 본부장",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [],
@@ -730,7 +730,7 @@ window.PROMPTER_SCRIPT = {
   },
   {
    "id": "k14",
-   "speaker": "근속상 이사님",
+   "speaker": "김형인 본부장",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [],
@@ -738,7 +738,7 @@ window.PROMPTER_SCRIPT = {
   },
   {
    "id": "k15",
-   "speaker": "근속상 이사님",
+   "speaker": "김형인 본부장",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [],
@@ -746,7 +746,7 @@ window.PROMPTER_SCRIPT = {
   },
   {
    "id": "k16",
-   "speaker": "근속상 이사님",
+   "speaker": "김형인 본부장",
    "kind": "dialogue",
    "section": "#4 수상자 소감",
    "before": [],
